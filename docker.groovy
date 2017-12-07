@@ -1,8 +1,6 @@
 import org.codehaus.groovy.runtime.GStringImpl;
 
-testHelper      = new com.concur.test.TestHelper()
-concurArtUtil   = new com.concur.ArtifactoryUtil()
-concurPipeline  = new com.concur.ConcurCommands()
+concurPipeline  = new com.concur.Commands()
 concurUtil      = new com.concur.Util()
 concurGit       = new com.concur.Git()
 concurGitHub    = new com.concur.GitHubApi()
@@ -107,12 +105,13 @@ public push(yml, args) {
     'additionalTags'      : additionalTags
   ])
 
-  bhDockerPublish {
-    image         = fullImageName
-    dockerUri     = dockerEndpoint
-    credentialId  = dockerCredentialId
-    tags          = additionalTags
-  }
+  println "image not pushed"
+  // bhDockerPublish {
+  //   image         = fullImageName
+  //   dockerUri     = dockerEndpoint
+  //   credentialId  = dockerCredentialId
+  //   tags          = additionalTags
+  // }
 }
 
 /*
@@ -138,55 +137,6 @@ public getStageName(yml, args, stepName) {
         return 'docker: push'
       }
       break
-  }
-}
-
-/*
- ******************************* REQUIRED TESTING *******************************
- This area is for testing your workflow, and is a required part of workflow files.
- All tests must pass in order for your workflow to be merged into the master branch.
- */
-
-def tests(yml) {
-  println testHelper.header("Testing docker.groovy...")
-
-  def fakeYaml = concurUtil.parseYAML(readFile(yml.testing.dockerTest.testYaml)).pipelines
-
-  // Mock environment data
-  env.COMMIT_SHA = "fake_commit_SHA"
-  env.GIT_COMMIT = "fake_git_commit"
-  
-  def fakeDockerfile = readFile yml.testing.dockerTest.payload
-
-  // Variables used for promotion
-  def fromRepo = ""
-  def toRepo = ""
-  def dockerImageName = "testing"
-
-  // Method tests
-  boolean passed = true
-  try {
-    println testHelper.debug("Creating [Dockerfile]...")
-    writeFile encoding: 'utf-8', file: 'Dockerfile', text: fakeDockerfile
-    println testHelper.debug("Echoing [Dockerfile]...")
-    sh "cat Dockerfile"
-    println testHelper.debug("Calling [build] function...")
-    build(fakeYaml, [:])
-    println testHelper.debug("Calling [push] function...")
-    push(fakeYaml, [:])
-  } catch (e) {
-    passed = false
-    println testHelper.fail("""|Errors with docker.groovy
-                                |----------------------------
-                                |$e""".stripMargin())
-  } finally {
-    if (passed) {
-      println testHelper.success("Testing for docker.groovy passed")
-      env.passedTests = (env.passedTests.toInteger() + 1)
-    } else {
-      println testHelper.fail("docker.groovy Testing failed")
-      env.failedTests = (env.failedTests.toInteger() + 1)
-    }
   }
 }
 

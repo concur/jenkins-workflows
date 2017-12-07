@@ -1,11 +1,10 @@
-testHelper      = new com.concur.test.TestHelper()
-concurPipeline  = new com.concur.ConcurCommands()
+concurPipeline  = new com.concur.Commands()
 concurUtil      = new com.concur.Util()
 
 public cargo(yml, args) {
   def dockerImage     = args?.buildImage      ?: yml.tools?.rust?.buildImage
   def additionalArgs  = args?.additionalArgs  ?: yml.tools?.cargo?.additionalArgs
-  def command         = args?.command         ?: "install"
+  def command         = args?.command         ?: "build"
 
   assert dockerImage : "[buildImage] is needed in [tools.rust] or as a parameter to the test step."
 
@@ -61,33 +60,4 @@ public getStageName(yml, args, stepName) {
   }
 }
 
-/*
-  ******************************* REQUIRED TESTING *************************************
-  This area is for testing your workflow, and is a required part of workflow files.
-  All tests must pass in order for your workflow to be merged into the master branch.
- */
-
-def tests(yml) {
-
-  println testHelper.header("Testing rust.groovy...")
-
-  // Method test
-  boolean passed = true
-  try {
-
-  } catch (e) {
-    passed = false
-    testHelper.fail("""|Errors with rust.groovy
-                       |----------------------------
-                       |$e""".stripMargin())
-  } finally {
-    if (passed) {
-      println testHelper.success("Testing for rust.groovy passed")
-      env.passedTests = (env.passedTests.toInteger() + 1)
-    } else {
-      println testHelper.fail("rust.groovy Testing failed")
-      env.failedTests = (env.failedTests.toInteger() + 1)
-    }
-  }
-}
 return this;
