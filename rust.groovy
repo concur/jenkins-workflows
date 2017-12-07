@@ -8,7 +8,7 @@ public cargo(yml, args) {
 
   assert dockerImage : "[buildImage] is needed in [tools.rust] or as a parameter to the test step."
 
-  dockerImage = concurUtils.mustacheReplaceAll(dockerImage)
+  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
 
   def cargoCommand = "cargo ${command}"
 
