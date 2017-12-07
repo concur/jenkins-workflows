@@ -56,7 +56,8 @@ public cargo(yml, args) {
 public getStageName(yml, args, stepName) {
   switch(stepName) {
     case 'cargo':
-      return "rust: cargo: ${args?.command ?: "install}"
+      def cargoCommand = args?.command ?: "install"
+      return "rust: cargo: ${cargoCommand}"
   }
 }
 
