@@ -2,13 +2,15 @@ concurPipeline  = new com.concur.Commands()
 concurUtil      = new com.concur.Util()
 
 public cargo(yml, args) {
-  def dockerImage     = args?.buildImage      ?: yml.tools?.rust?.buildImage
-  def additionalArgs  = args?.additionalArgs  ?: yml.tools?.cargo?.additionalArgs
-  def command         = args?.command         ?: "build"
+  def buildImage        = args?.buildImage      ?: yml.tools?.rust?.buildImage
+  def additionalArgs    = args?.additionalArgs  ?: yml.tools?.rust?.additionalArgs
+  def rustupComponents  = args?.components      ?: yml.tools?.rust?.components
+  def toolchain         = args?.toolchain       ?: yml.tools?.rust?.toolchain
+  def command           = args?.command         ?: "build"
 
-  assert dockerImage : "[buildImage] is needed in [tools.rust] or as a parameter to the test step."
+  assert buildImage : "[buildImage] is needed in [tools.rust] or as a parameter to the test step."
 
-  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
+  buildImage = concurUtil.mustacheReplaceAll(buildImage)
 
   def cargoCommand = "cargo ${command}"
 
@@ -36,14 +38,32 @@ public cargo(yml, args) {
   }
 
   concurPipeline.debugPrint([
-    'dockerImage'     : dockerImage,
+    'buildImage'      : buildImage,
     'command'         : command,
     'additionalArgs'  : additionalArgs,
     'cargoCommand'    : cargoCommand
   ])
 
   // -u 0:0 runs as root, -v mounts the current workspace to your gopath
-  docker.image(dockerImage).inside {
+  docker.image(buildImage).inside {
+    /*
+      RustUp is a tool for managing Rust and its components
+     */
+    if (rustupComponents) {
+      assert (rustupComponents instanceof List) : """
+      |To install additional rustup components please provide as a list.
+      |Example:
+      |----------------------------------------------------------------
+      |pipelines:
+      |  tools:
+      |    rust:
+      |      components:
+      |        - rust-std-x86_64-unknown-linux-musl
+      |        - rust-std-x86_64-apple-darwin""".stripMargin()
+      rustupComponents.each {
+        sh "rustup component add ${it}"
+      }
+    }
     sh cargoCommand
   }
 }
