@@ -6,7 +6,8 @@ public cargo(yml, args) {
   def additionalArgs    = args?.additionalArgs  ?: yml.tools?.rust?.additionalArgs
   def rustupComponents  = args?.components      ?: yml.tools?.rust?.components
   def toolchain         = args?.toolchain       ?: yml.tools?.rust?.toolchain
-  def command           = args?.command         ?: "build"
+  def command           = args?.command         ?: yml.tools?.rust?.command         ?: "build"
+  def cargoDir          = args?.cargoDir        ?: yml.tools?.rust?.cargoDir        ?: "/usr/local/cargo/registry/"
 
   assert buildImage : "[buildImage] is needed in [tools.rust] or as a parameter to the test step."
 
@@ -45,7 +46,7 @@ public cargo(yml, args) {
   ])
 
   // -u 0:0 runs as root, -v mounts the current workspace to your gopath
-  docker.image(buildImage).inside {
+  docker.image(buildImage).inside("-v \"${pwd()}/.cargo:${cargoDir}:rw\"") {
     /*
       RustUp is a tool for managing Rust and its components
      */
@@ -76,7 +77,7 @@ public cargo(yml, args) {
 public getStageName(yml, args, stepName) {
   switch(stepName) {
     case 'cargo':
-      def cargoCommand = args?.command ?: "install"
+      def cargoCommand = args?.command ?: "build"
       return "rust: cargo: ${cargoCommand}"
   }
 }
