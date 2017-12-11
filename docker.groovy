@@ -10,9 +10,9 @@ public build(yml, args) {
   String baseVersion  = yml.general?.version?.base  ?: "0.1.0"
   String buildVersion = concurGit.getVersion(baseVersion)
   String buildDate    = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-  
-  String dockerfile   = args?.dockerfile            ?: yml.tools?.docker?.dockerfile
-  String buildArgs    = args?.buildArgs             ?: yml.tools?.docker?.buildArgs
+
+  String dockerfile   = args?.dockerfile            ?: yml.tools?.docker?.dockerfile  ?: ""
+  String buildArgs    = args?.buildArgs             ?: yml.tools?.docker?.buildArgs   ?: ""
   String imageName    = args?.imageName             ?: yml.tools?.docker?.imageName   ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
   String imageTag     = args?.imageTag              ?: yml.tools?.docker?.imageTag    ?: buildVersion
   String context      = args?.contextPath           ?: yml.tools?.docker?.contextPath ?: '.'
@@ -65,11 +65,11 @@ public push(yml, args) {
   Map orgAndRepo        = concurGitHub.getGitHubOrgAndRepo()
   String baseVersion    = yml.general?.version?.base ?: "0.1.0"
   String buildVersion   = concurGit.getVersion(baseVersion)
-  String imageName      = args?.imageName      ?: yml.tools?.docker?.imageName ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
-  String imageTag       = args?.imageTag       ?: yml.tools?.docker?.imageTag  ?: buildVersion
-  String dockerEndpoint = args?.uri            ?: yml.tools?.docker?.uri       ?: env.DOCKER_URI
-  String additionalTags = args?.additionalTags ?: yml.tools?.docker?.additionalTags
-  String credentials    = args?.credentials    ?: yml.tools?.docker?.credentials
+  String imageName      = args?.imageName      ?: yml.tools?.docker?.imageName      ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
+  String imageTag       = args?.imageTag       ?: yml.tools?.docker?.imageTag       ?: buildVersion
+  String dockerEndpoint = args?.uri            ?: yml.tools?.docker?.uri            ?: env.DOCKER_URI
+  List additionalTags   = args?.additionalTags ?: yml.tools?.docker?.additionalTags ?: []
+  Map credentials       = args?.credentials    ?: yml.tools?.docker?.credentials    ?: [:]
 
   def dockerCredentialId
 
