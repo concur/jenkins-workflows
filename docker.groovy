@@ -11,12 +11,12 @@ public build(yml, args) {
   String buildVersion = concurGit.getVersion(baseVersion)
   String buildDate    = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
 
-  String dockerfile   = args?.dockerfile            ?: yml.tools?.docker?.dockerfile  ?: ""
-  String buildArgs    = args?.buildArgs             ?: yml.tools?.docker?.buildArgs   ?: ""
-  String imageName    = args?.imageName             ?: yml.tools?.docker?.imageName   ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
-  String imageTag     = args?.imageTag              ?: yml.tools?.docker?.imageTag    ?: buildVersion
-  String context      = args?.contextPath           ?: yml.tools?.docker?.contextPath ?: '.'
-  String vcsUrl       = args?.vcsUrl                ?: yml.tools?.github?.uri         ?: "https://github.concur.com/${orgAndRepo.org}/${orgAndRepo.repo}"
+  String dockerfile = args?.dockerfile            ?: yml.tools?.docker?.dockerfile  ?: ""
+  String imageName  = args?.imageName             ?: yml.tools?.docker?.imageName   ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
+  String imageTag   = args?.imageTag              ?: yml.tools?.docker?.imageTag    ?: buildVersion
+  String context    = args?.contextPath           ?: yml.tools?.docker?.contextPath ?: '.'
+  String vcsUrl     = args?.vcsUrl                ?: yml.tools?.github?.uri         ?: "https://github.concur.com/${orgAndRepo.org}/${orgAndRepo.repo}"
+  Map buildArgs     = args?.buildArgs             ?: yml.tools?.docker?.buildArgs   ?: [:]
 
   String additionalArgs = ""
 
@@ -25,17 +25,7 @@ public build(yml, args) {
   }
 
   if (buildArgs) {
-    String tmpArgs = ""
-    if (buildArgs instanceof Map) {
-      tmpArgs = buildArgs.collect { "--build-arg ${it.key}=${it.value}" }.join(' ')
-    } else if (buildArgs instanceof List) {
-      tmpArgs = buildArgs.collect { "--build-arg ${it}" }.join(' ')
-    } else if (buildArgs instanceof String) {
-      tmpArgs = buildArgs
-    } else {
-      error("Error with format docker.build of pipelines.yml, please verify the buildArgs in tools.docker.buildArgs or the parameter passed to the step. The buildArgs node should be a Map, a List or a String. The provided data is a [${buildArgs.getClass()}]")
-    }
-    additionalArgs = "${additionalArgs} ${tmpArgs}"
+    additionalArgs = "${additionalArgs} ${buildArgs.collect { "--build-arg ${it.key}=${it.value}" }.join(' ')}"
   }
 
   additionalArgs = concurUtil.mustacheReplaceAll("${additionalArgs} ${context}", [
