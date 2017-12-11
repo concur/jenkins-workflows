@@ -6,26 +6,26 @@ concurGit       = new com.concur.Git()
 concurGitHub    = new com.concur.GitHubApi()
 
 public build(yml, args) {
-  def orgAndRepo    = concurGitHub.getGitHubOrgAndRepo()
-  def baseVersion   = yml.general?.version?.base  ?: "0.1.0"
-  def buildVersion  = concurGit.getVersion(baseVersion)
-  def buildDate     = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+  Map orgAndRepo      = concurGitHub.getGitHubOrgAndRepo()
+  String baseVersion  = yml.general?.version?.base  ?: "0.1.0"
+  String buildVersion = concurGit.getVersion(baseVersion)
+  String buildDate    = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+  
+  String dockerfile   = args?.dockerfile            ?: yml.tools?.docker?.dockerfile
+  String buildArgs    = args?.buildArgs             ?: yml.tools?.docker?.buildArgs
+  String imageName    = args?.imageName             ?: yml.tools?.docker?.imageName   ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
+  String imageTag     = args?.imageTag              ?: yml.tools?.docker?.imageTag    ?: buildVersion
+  String context      = args?.contextPath           ?: yml.tools?.docker?.contextPath ?: '.'
+  String vcsUrl       = args?.vcsUrl                ?: yml.tools?.github?.uri         ?: "https://github.concur.com/${orgAndRepo.org}/${orgAndRepo.repo}"
 
-  def dockerfile    = args?.dockerfile            ?: yml.tools?.docker?.dockerfile
-  def buildArgs     = args?.buildArgs             ?: yml.tools?.docker?.buildArgs
-  def imageName     = args?.imageName             ?: yml.tools?.docker?.imageName   ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
-  def imageTag      = args?.imageTag              ?: yml.tools?.docker?.imageTag    ?: buildVersion
-  def context       = args?.contextPath           ?: yml.tools?.docker?.contextPath ?: '.'
-  def vcsUrl        = args?.vcsUrl                ?: yml.tools?.github?.uri         ?: "https://github.concur.com/${orgAndRepo.org}/${orgAndRepo.repo}"
-
-  def additionalArgs = ""
+  String additionalArgs = ""
 
   if (dockerfile) {
     additionalArgs = "${additionalArgs} --file ${dockerfile}"
   }
 
   if (buildArgs) {
-    def tmpArgs = ""
+    String tmpArgs = ""
     if (buildArgs instanceof Map) {
       tmpArgs = buildArgs.collect { "--build-arg ${it.key}=${it.value}" }.join(' ')
     } else if (buildArgs instanceof List) {
@@ -39,13 +39,12 @@ public build(yml, args) {
   }
 
   additionalArgs = concurUtil.mustacheReplaceAll("${additionalArgs} ${context}", [
-    'BUILD_VERSION' : buildVersion,
     'COMMIT_SHA'    : env.GIT_COMMIT,
     'VCS_URL'       : vcsUrl,
     'BUILD_DATE'    : buildDate
   ])
 
-  def fullImageName = concurUtil.mustacheReplaceAll("${imageName}:${imageTag}")
+  String fullImageName = concurUtil.mustacheReplaceAll("${imageName}:${imageTag}")
 
   concurPipeline.debugPrint('Workflows :: docker :: build', [
     'dockerfile'    : dockerfile,
@@ -63,14 +62,14 @@ public build(yml, args) {
 }
 
 public push(yml, args) {
-  def baseVersion    = yml.general?.version?.base ?: "0.1.0"
-  def buildVersion   = concurGit.getVersion(baseVersion)
-  def orgAndRepo     = concurGitHub.getGitHubOrgAndRepo()
-  def imageName      = args?.imageName      ?: yml.tools?.docker?.imageName ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
-  def imageTag       = args?.imageTag       ?: yml.tools?.docker?.imageTag  ?: buildVersion
-  def dockerEndpoint = args?.uri            ?: yml.tools?.docker?.uri       ?: env.DOCKER_URI
-  def additionalTags = args?.additionalTags ?: yml.tools?.docker?.additionalTags
-  def credentials    = args?.credentials    ?: yml.tools?.docker?.credentials
+  Map orgAndRepo        = concurGitHub.getGitHubOrgAndRepo()
+  String baseVersion    = yml.general?.version?.base ?: "0.1.0"
+  String buildVersion   = concurGit.getVersion(baseVersion)
+  String imageName      = args?.imageName      ?: yml.tools?.docker?.imageName ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
+  String imageTag       = args?.imageTag       ?: yml.tools?.docker?.imageTag  ?: buildVersion
+  String dockerEndpoint = args?.uri            ?: yml.tools?.docker?.uri       ?: env.DOCKER_URI
+  String additionalTags = args?.additionalTags ?: yml.tools?.docker?.additionalTags
+  String credentials    = args?.credentials    ?: yml.tools?.docker?.credentials
 
   def dockerCredentialId
 

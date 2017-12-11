@@ -2,18 +2,18 @@ concurPipeline  = new com.concur.Commands()
 concurUtil      = new com.concur.Util()
 
 public cargo(yml, args) {
-  def buildImage        = args?.buildImage      ?: yml.tools?.rust?.buildImage
-  def additionalArgs    = args?.additionalArgs  ?: yml.tools?.rust?.additionalArgs
-  def rustupComponents  = args?.components      ?: yml.tools?.rust?.components
-  def toolchain         = args?.toolchain       ?: yml.tools?.rust?.toolchain
-  def command           = args?.command         ?: yml.tools?.rust?.command         ?: "build"
-  def cargoDir          = args?.cargoDir        ?: yml.tools?.rust?.cargoDir        ?: "/usr/local/cargo/registry/"
+  String buildImage        = args?.buildImage      ?: yml.tools?.rust?.buildImage
+  String additionalArgs    = args?.additionalArgs  ?: yml.tools?.rust?.additionalArgs
+  String rustupComponents  = args?.components      ?: yml.tools?.rust?.components
+  String toolchain         = args?.toolchain       ?: yml.tools?.rust?.toolchain
+  String command           = args?.command         ?: yml.tools?.rust?.command         ?: "build"
+  String cargoDir          = args?.cargoDir        ?: yml.tools?.rust?.cargoDir        ?: "/usr/local/cargo/registry/"
 
   assert buildImage : "[buildImage] is needed in [tools.rust] or as a parameter to the test step."
 
   buildImage = concurUtil.mustacheReplaceAll(buildImage)
 
-  def cargoCommand = "cargo ${command}"
+  String cargoCommand = "cargo ${command}"
 
   /**
    * Define additional args as any of the following
