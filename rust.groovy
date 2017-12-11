@@ -38,7 +38,7 @@ public cargo(yml, args) {
     }
   }
 
-  concurPipeline.debugPrint([
+  concurPipeline.debugPrint("Workflows :: rust :: cargo", [
     'buildImage'      : buildImage,
     'command'         : command,
     'additionalArgs'  : additionalArgs,

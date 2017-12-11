@@ -10,9 +10,9 @@ public getStageName(yml, args, stepName) {
   switch(stepName) {
     case 'work':
       if (args?.name) {
-        return "test: work: ${args.name}"
+        return "example: work: ${args.name}"
       } else {
-        return 'test: work'
+        return 'example: work'
       }
   }
 }
