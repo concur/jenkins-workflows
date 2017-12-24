@@ -2,7 +2,7 @@ import com.concur.*;
 
 concurPipeline  = new Commands()
 concurGithub    = new GitHubApi()
-concurUtils     = new Util()
+concurUtil      = new Util()
 
 public glide(yml, args) {
   def dockerImage     = args?.buildImage      ?: yml.tools?.golang?.buildImage
