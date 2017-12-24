@@ -245,8 +245,7 @@ public test(yml, args) {
 }
 
 private getGoPath() {
-  def gitData = concurGit.getGitData()
-  return "/go/src/${gitData.host}/${gitData.org}/${gitData.repo}"
+  return "/go/src/${GIT_HOST}/${env.GIT_ORG}/${env.GIT_REPO}"
 }
 
 private runCommandInDockerImage(dockerImage, goPath, work) {

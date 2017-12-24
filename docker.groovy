@@ -5,16 +5,15 @@ concurUtil      = new com.concur.Util()
 concurGit       = new com.concur.Git()
 
 public build(yml, args) {
-  Map orgAndRepo      = concurGit.getGitData()
   String baseVersion  = yml.general?.version?.base  ?: "0.1.0"
   String buildVersion = concurGit.getVersion(baseVersion)
   String buildDate    = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
 
   String dockerfile = args?.dockerfile            ?: yml.tools?.docker?.dockerfile  ?: ""
-  String imageName  = args?.imageName             ?: yml.tools?.docker?.imageName   ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
+  String imageName  = args?.imageName             ?: yml.tools?.docker?.imageName   ?: "${env.GIT_ORG}/${env.GIT_REPO}"
   String imageTag   = args?.imageTag              ?: yml.tools?.docker?.imageTag    ?: buildVersion
   String context    = args?.contextPath           ?: yml.tools?.docker?.contextPath ?: '.'
-  String vcsUrl     = args?.vcsUrl                ?: yml.tools?.github?.uri         ?: "https://github.concur.com/${orgAndRepo.org}/${orgAndRepo.repo}"
+  String vcsUrl     = args?.vcsUrl                ?: yml.tools?.github?.uri         ?: "https://${GIT_HOST}/${env.GIT_ORG}/${env.GIT_REPO}"
   Map buildArgs     = args?.buildArgs             ?: yml.tools?.docker?.buildArgs   ?: [:]
 
   String additionalArgs = ""
@@ -51,10 +50,9 @@ public build(yml, args) {
 }
 
 public push(yml, args) {
-  Map orgAndRepo        = concurGit.getGitData()
   String baseVersion    = yml.general?.version?.base ?: "0.1.0"
   String buildVersion   = concurGit.getVersion(baseVersion)
-  String imageName      = args?.imageName      ?: yml.tools?.docker?.imageName      ?: "${orgAndRepo.org}/${orgAndRepo.repo}"
+  String imageName      = args?.imageName      ?: yml.tools?.docker?.imageName      ?: "${env.GIT_ORG}/${env.GIT_REPO}"
   String imageTag       = args?.imageTag       ?: yml.tools?.docker?.imageTag       ?: buildVersion
   String dockerEndpoint = args?.uri            ?: yml.tools?.docker?.uri            ?: env.DOCKER_URI
   List additionalTags   = args?.additionalTags ?: yml.tools?.docker?.additionalTags ?: []
