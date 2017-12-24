@@ -78,7 +78,7 @@ public push(yml, args) {
     dockerCredentialId = concurPipeline.getCredentialsWithCriteria(credentials).id
   }
 
-  def fullImageName = concurUtil.mustacheReplaceAll("${imageName}:${imageTag}")
+  def fullImageName = concurUtil.mustacheReplaceAll("${dockerEndpoint}/${imageName}:${imageTag}")
 
   concurPipeline.debugPrint("Workflows :: Docker :: Push", [
     'baseVersion'         : baseVersion,
@@ -92,12 +92,18 @@ public push(yml, args) {
   ])
 
   println "image not pushed"
-  // bhDockerPublish {
-  //   image         = fullImageName
-  //   dockerUri     = dockerEndpoint
-  //   credentialId  = dockerCredentialId
-  //   tags          = additionalTags
-  // }
+  withCredentials(usernamePassword(credentialsId: dockerCredentialId, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+    sh "docker logout ${dockerEndpoint}"
+    sh "docker tag ${imageName}:${imageTag} ${fullImageName}"
+    sh "docker login ${dockerEndpoint} -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD}"
+    docker.image(fullImageName).push()
+    if (additionalTags) {
+      assert (additionalTags instanceof List) : "Workflows :: Docker :: Push :: additionalTags provided but not as a list."
+      additionalTags.each {
+        docker.image(fullImageName).push(concurUtil.kebab(it))
+      }
+    }
+  }
 }
 
 /*
