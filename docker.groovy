@@ -92,7 +92,7 @@ public push(yml, args) {
   ])
 
   println "image not pushed"
-  withCredentials(usernamePassword(credentialsId: dockerCredentialId, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+  withCredentials([usernamePassword(credentialsId: dockerCredentialId, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
     sh "docker logout ${dockerEndpoint}"
     sh "docker tag ${imageName}:${imageTag} ${fullImageName}"
     sh "docker login ${dockerEndpoint} -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD}"
