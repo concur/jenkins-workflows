@@ -13,7 +13,7 @@ public glide(yml, args) {
   assert goPath      : "Workflows :: Golang :: glide :: [goPath] is required in [tools.golang] or as a parameter to the test step."
   assert dockerImage : "Workflows :: Golang :: glide :: [buildImage] is needed in [tools.golang] or as a parameter to the test step."
 
-  dockerImage = concurUtils.mustacheReplaceAll(dockerImage)
+  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
 
   def glideCommand = "glide ${command}"
 
@@ -66,7 +66,7 @@ public godep(yml, args) {
   assert goPath      : "Workflows :: Golang :: godep :: [goPath] is required in [tools.golang] or as a parameter to the test step."
   assert dockerImage : "Workflows :: Golang :: godep :: [buildImage] is needed in [tools.golang] or as a parameter to the test step."
 
-  dockerImage = concurUtils.mustacheReplaceAll(dockerImage)
+  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
 
   def godepCommand = "godep ${command}"
 
@@ -120,7 +120,7 @@ public build(yml, args) {
   assert goPath      : "Workflows :: Golang :: build :: [goPath] is required in [tools.golang] or as a parameter to the test step."
   assert dockerImage : "Workflows :: Golang :: build :: [buildImage] is needed in [tools.golang] or as a parameter to the test step."
 
-  dockerImage = concurUtils.mustacheReplaceAll(dockerImage)
+  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
 
   def goCommand = "go build"
 
@@ -193,7 +193,7 @@ public test(yml, args) {
   assert goPath       : "Workflows :: Golang :: [goPath] is required in [tools.golang] or as a parameter to the test step."
   assert junitPattern : "Workflows :: Golang :: [junitPattern] is required in [tools.golang] or as a parameter to the test step."
 
-  dockerImage = concurUtils.mustacheReplaceAll(dockerImage)
+  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
 
   def testCommand = testBinary
 
