@@ -67,8 +67,8 @@ public push(yml, args) {
 
   if (credentials != null) {
     assert (credentials instanceof Map) :
-    """|Credentials are provided either in [tools.docker.credentials] or as a parameter to this step. 
-       |The data provided is not a map. 
+    """|Credentials are provided either in [tools.docker.credentials] or as a parameter to this step.
+       |The data provided is not a map.
        |Credentials should be defined in your pipelines.yml as:
        |----------------------------------------
        |tools:
@@ -80,7 +80,7 @@ public push(yml, args) {
 
   def fullImageName = concurUtil.mustacheReplaceAll("${imageName}:${imageTag}")
 
-  concurPipeline.debugPrint([
+  concurPipeline.debugPrint("Workflows :: Docker :: Push", [
     'baseVersion'         : baseVersion,
     'imageName'           : imageName,
     'buildVersion'        : buildVersion,
