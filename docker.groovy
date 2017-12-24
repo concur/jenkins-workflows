@@ -99,9 +99,8 @@ public push(yml, args) {
     docker.image(fullImageName).push()
     if (additionalTags) {
       assert (additionalTags instanceof List) : "Workflows :: Docker :: Push :: additionalTags provided but not as a list."
-      additionalTags = concurUtil.mustacheReplaceAll(additionalTags.join('|')).split('|')
       additionalTags.each {
-        docker.image(fullImageName).push(concurUtil.kebab(it))
+        docker.image(fullImageName).push(concurUtil.kebab(concurUtil.mustacheReplaceAll(it)))
       }
     }
   }
