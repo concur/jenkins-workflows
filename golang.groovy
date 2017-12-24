@@ -52,7 +52,11 @@ public glide(yml, args) {
 
   // -u 0:0 runs as root, -v mounts the current workspace to your gopath
   runCommandInDockerImage(dockerImage, goPath, {
-    sh "go get github.com/Masterminds/glide"
+    def glideInstalled = sh returnStatus: true, script: "which glide"
+    if (glideInstalled == 1) {
+      println "Glide not found, installing..."
+      sh "go get -v github.com/Masterminds/glide"
+    }
     sh "cd ${goPath} && ${glideCommand}"
   })
 }
@@ -104,7 +108,11 @@ public godep(yml, args) {
   ])
 
   runCommandInDockerImage(dockerImage, goPath, {
-    sh "go get github.com/tools/godep"
+    def glideInstalled = sh returnStatus: true, script: "which godep"
+    if (glideInstalled == 1) {
+      println "Godep not found, installing..."
+      sh "go get -v github.com/tools/godep"
+    }
     sh "cd ${goPath} && ${godepCommand}"
   })
 }
