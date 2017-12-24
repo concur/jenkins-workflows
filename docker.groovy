@@ -3,10 +3,9 @@ import org.codehaus.groovy.runtime.GStringImpl;
 concurPipeline  = new com.concur.Commands()
 concurUtil      = new com.concur.Util()
 concurGit       = new com.concur.Git()
-concurGitHub    = new com.concur.GitHubApi()
 
 public build(yml, args) {
-  Map orgAndRepo      = concurGitHub.getGitHubOrgAndRepo()
+  Map orgAndRepo      = concurGit.getGitData()
   String baseVersion  = yml.general?.version?.base  ?: "0.1.0"
   String buildVersion = concurGit.getVersion(baseVersion)
   String buildDate    = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
@@ -52,7 +51,7 @@ public build(yml, args) {
 }
 
 public push(yml, args) {
-  Map orgAndRepo        = concurGitHub.getGitHubOrgAndRepo()
+  Map orgAndRepo        = concurGit.getGitData()
   String baseVersion    = yml.general?.version?.base ?: "0.1.0"
   String buildVersion   = concurGit.getVersion(baseVersion)
   String imageName      = args?.imageName      ?: yml.tools?.docker?.imageName      ?: "${orgAndRepo.org}/${orgAndRepo.repo}"

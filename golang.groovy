@@ -1,7 +1,7 @@
 import com.concur.*;
 
 concurPipeline  = new Commands()
-concurGithub    = new GitHubApi()
+concurGit       = new Git()
 concurUtil      = new Util()
 
 public glide(yml, args) {
@@ -245,8 +245,8 @@ public test(yml, args) {
 }
 
 private getGoPath() {
-  def orgRepo = concurGithub.getGitHubOrgAndRepo()
-  return "/go/src/github.concur.com/${orgRepo.org}/${orgRepo.repo}"
+  def gitData = concurGit.getGitData()
+  return "/go/src/${gitData.host}/${gitData.org}/${gitData.repo}"
 }
 
 private runCommandInDockerImage(dockerImage, goPath, work) {
