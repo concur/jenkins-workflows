@@ -4,7 +4,7 @@ concurPipeline  = new Commands()
 concurGit       = new Git()
 concurUtil      = new Util()
 
-public glide(yml, args) {
+public glide(Map yml, Map args) {
   def dockerImage     = args?.buildImage      ?: yml.tools?.golang?.buildImage
   def additionalArgs  = args?.additionalArgs  ?: yml.tools?.glide?.additionalArgs
   def goPath          = args?.goPath          ?: yml.tools?.golang?.goPath        ?: getGoPath()
@@ -57,7 +57,7 @@ public glide(yml, args) {
   })
 }
 
-public godep(yml, args) {
+public godep(Map yml, Map args) {
   def dockerImage     = args?.buildImage      ?: yml.tools?.golang?.buildImage
   def additionalArgs  = args?.additionalArgs  ?: yml.tools?.glide?.additionalArgs
   def command         = args?.command         ?: "ensure"
@@ -109,7 +109,7 @@ public godep(yml, args) {
   })
 }
 
-public build(yml, args) {
+public build(Map yml, Map args) {
   def dockerImage     = args?.buildImage    ?: yml.tools?.golang?.buildImage
   def outFile         = args?.outFile       ?: yml.tools?.golang?.outFile
   def goEnv           = args?.env           ?: yml.tools?.golang?.env
@@ -180,7 +180,7 @@ public build(yml, args) {
   })
 }
 
-public test(yml, args) {
+public test(Map yml, Map args) {
   def dockerImage     = args?.buildImage      ?: yml.tools?.golang?.buildImage
   def additionalArgs  = args?.additionalArgs  ?: yml.tools?.golang?.additionalArgs
   def goPath          = args?.goPath          ?: yml.tools?.golang?.goPath          ?: getGoPath()
@@ -248,7 +248,7 @@ private getGoPath() {
   return "/go/src/${GIT_HOST}/${env.GIT_ORG}/${env.GIT_REPO}"
 }
 
-private runCommandInDockerImage(dockerImage, goPath, work) {
+private runCommandInDockerImage(Map dockerImage, Map goPath, Closure work) {
   docker.image(dockerImage).inside("-u 0:0 -v ${pwd()}:${goPath}") {
     work()
   }
@@ -260,7 +260,7 @@ private runCommandInDockerImage(dockerImage, goPath, work) {
   All tests must pass in order for your workflow to be merged into the master branch.
  */
 
-def tests(yml) {
+def tests(Map yml, Map args) {
   println testHelper.header("Testing golang.groovy...")
   // Mock for the pipelines.yml used for testing
   def fakeYml = """"""

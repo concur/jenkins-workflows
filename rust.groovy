@@ -1,7 +1,7 @@
 concurPipeline  = new com.concur.Commands()
 concurUtil      = new com.concur.Util()
 
-public cargo(yml, args) {
+public cargo(Map yml, Map args) {
   String buildImage        = args?.buildImage      ?: yml.tools?.rust?.buildImage
   String additionalArgs    = args?.additionalArgs  ?: yml.tools?.rust?.additionalArgs
   String rustupComponents  = args?.components      ?: yml.tools?.rust?.components
@@ -74,7 +74,7 @@ public cargo(yml, args) {
  This a section for common utilities being called from the runSteps method in com.concur.Commands
  */
 
-public getStageName(yml, args, stepName) {
+public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
     case 'cargo':
       def cargoCommand = args?.command ?: "build"

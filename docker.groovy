@@ -4,7 +4,7 @@ concurPipeline  = new com.concur.Commands()
 concurUtil      = new com.concur.Util()
 concurGit       = new com.concur.Git()
 
-public build(yml, args) {
+public build(Map yml, Map args) {
   String baseVersion  = yml.general?.version?.base  ?: "0.1.0"
   String buildVersion = concurGit.getVersion(baseVersion)
   String buildDate    = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
@@ -49,7 +49,7 @@ public build(yml, args) {
   docker.build(fullImageName, additionalArgs)
 }
 
-public push(yml, args) {
+public push(Map yml, Map args) {
   String baseVersion    = yml.general?.version?.base ?: "0.1.0"
   String buildVersion   = concurGit.getVersion(baseVersion)
   String imageName      = args?.imageName      ?: yml.tools?.docker?.imageName      ?: "${env.GIT_ORG}/${env.GIT_REPO}"
@@ -111,7 +111,7 @@ public push(yml, args) {
  This a section for common utilities being called from the runSteps method in com.concur.Commands
  */
 
-public getStageName(yml, args, stepName) {
+public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
     case 'build':
       def dockerfile = args?.dockerfile ?: yml.tools?.docker?.dockerfile

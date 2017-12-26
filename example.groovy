@@ -1,4 +1,4 @@
-public work(yml, args) {
+public work(Map yml, Map args) {
   println "yml :: $yml"
   println "args :: $args"
 }
@@ -6,7 +6,7 @@ public work(yml, args) {
 /*
  * Allow the Workflow execution to determine how to name each stage.
  */
-public getStageName(yml, args, stepName) {
+public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
     case 'work':
       if (args?.name) {
