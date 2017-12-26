@@ -248,7 +248,7 @@ private getGoPath() {
   return "/go/src/${GIT_HOST}/${env.GIT_ORG}/${env.GIT_REPO}"
 }
 
-private runCommandInDockerImage(Map dockerImage, Map goPath, Closure work) {
+private runCommandInDockerImage(Map dockerImage, String goPath, Closure work) {
   docker.image(dockerImage).inside("-u 0:0 -v ${pwd()}:${goPath}") {
     work()
   }
