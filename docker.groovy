@@ -7,9 +7,8 @@ concurGit       = new com.concur.Git()
 public build(Map yml, Map args) {
   String baseVersion  = yml.general?.version?.base  ?: "0.1.0"
   String buildVersion = concurGit.getVersion(baseVersion)
-  String buildDate    = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
 
-  String dockerfile = args?.dockerfile            ?: yml.tools?.docker?.dockerfile  ?: ""
+  String dockerfile = args?.dockerfile            ?: yml.tools?.docker?.dockerfile
   String imageName  = args?.imageName             ?: yml.tools?.docker?.imageName   ?: "${env.GIT_ORG}/${env.GIT_REPO}"
   String imageTag   = args?.imageTag              ?: yml.tools?.docker?.imageTag    ?: buildVersion
   String context    = args?.contextPath           ?: yml.tools?.docker?.contextPath ?: '.'
@@ -27,9 +26,7 @@ public build(Map yml, Map args) {
   }
 
   additionalArgs = concurUtil.mustacheReplaceAll("${additionalArgs} ${context}", [
-    'COMMIT_SHA'    : env.GIT_COMMIT,
-    'VCS_URL'       : vcsUrl,
-    'BUILD_DATE'    : buildDate
+    'VCS_URL'       : vcsUrl
   ])
 
   String fullImageName = concurUtil.mustacheReplaceAll("${imageName}:${imageTag}")
@@ -93,6 +90,7 @@ public push(Map yml, Map args) {
 
   println "image not pushed"
   withCredentials([usernamePassword(credentialsId: dockerCredentialId, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+    // using this instead of withRegistry because of various errors encountered when using it in production.
     sh "docker logout ${dockerEndpoint}"
     sh "docker tag ${imageName}:${imageTag} ${fullImageName}"
     sh "docker login ${dockerEndpoint} -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD}"
@@ -115,20 +113,10 @@ public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
     case 'build':
       def dockerfile = args?.dockerfile ?: yml.tools?.docker?.dockerfile
-      if (dockerfile) {
-        return "docker: build: ${dockerfile}"
-      } else {
-        return 'docker: build'
-      }
-      break
+      return dockerfile ? "docker: build: ${dockerfile}": 'docker: build'
     case 'push':
       def dockerUri = args?.uri ?: yml.tools?.docker?.uri
-      if (dockerUri) {
-        return "docker: push: ${dockerUri}"
-      } else {
-        return 'docker: push'
-      }
-      break
+      return dockerUri ? "docker: push: ${dockerUri}" : 'docker: push'
   }
 }
 

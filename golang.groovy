@@ -255,37 +255,15 @@ private runCommandInDockerImage(String dockerImage, String goPath, Closure work)
 }
 
 /*
-  ******************************* REQUIRED TESTING *************************************
-  This area is for testing your workflow, and is a required part of workflow files.
-  All tests must pass in order for your workflow to be merged into the master branch.
+ ******************************* COMMON *******************************
+ This a section for common utilities being called from the runSteps method in com.concur.Commands
  */
 
-def tests(Map yml, Map args) {
-  println testHelper.header("Testing golang.groovy...")
-  // Mock for the pipelines.yml used for testing
-  def fakeYml = """"""
-
-  // Mock environment data
-
-  // Job variables
-
-  // Method test
-  boolean passed = true
-  try {
-
-  } catch (e) {
-    passed = false
-    println testHelper.fail("""|Errors with golang.groovy
-                        |----------------------------
-                        |$e""".stripMargin())
-  } finally {
-    if (passed) {
-      println testHelper.success("Testing for golang.groovy passed")
-      env.passedTests = (env.passedTests.toInteger() + 1)
-    } else {
-      println testHelper.fail("golang.groovy Testing failed")
-      env.failedTests = (env.failedTests.toInteger() + 1)
-    }
+public getStageName(Map yml, Map args, String stepName) {
+  switch(stepName) {
+    case 'cargo':
+      def cargoCommand = args?.command ?: "build"
+      return "rust: cargo: ${cargoCommand}"
   }
 }
 

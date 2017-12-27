@@ -9,11 +9,7 @@ public work(Map yml, Map args) {
 public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
     case 'work':
-      if (args?.name) {
-        return "example: work: ${args.name}"
-      } else {
-        return 'example: work'
-      }
+      return args?.name ? "example: work: ${args.name}" : 'example: work'
   }
 }
 

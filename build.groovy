@@ -24,4 +24,17 @@ public mage(Map yml, Map args) {
   }
 }
 
+/*
+ ******************************* COMMON *******************************
+ This a section for common utilities being called from the runSteps method in com.concur.Commands
+ */
+
+public getStageName(Map yml, Map args, String stepName) {
+  switch(stepName) {
+    case 'mage':
+      def mageTarget = args?.target ?: yml.tools?.mage?.target
+      return mageTarget ? "build: mage: ${mageTarget}" : "build: mage"
+  }
+}
+
 return this;

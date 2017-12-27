@@ -1,27 +1,30 @@
-testHelper      = new com.concur.test.TestHelper()
-concurPipeline  = new com.concur.ConcurCommands()
-concurGitHubApi = new com.concur.GitHubApi()
-concurUtil      = new com.concur.Util()
+import com.concur.*;
+
+concurPipeline  = new Commands()
+concurGit       = new Git()
+concurGitHubApi = new GitHubApi()
+concurUtil      = new Util()
 
 public createPullRequest(yml, args) {
   try {
-    def orgAndRepo      = concurGitHubApi.getGitHubOrgAndRepo()
-    def fromBranch      = args?.fromBranch  ?: env.BRANCH_NAME
-    def toBranch        = args?.toBranch    ?: yml.tools?.github?.master ?: 'master'
-    def org             = args?.org         ?: orgAndRepo.org
-    def repo            = args?.repo        ?: orgAndRepo.repo
-    def title           = args?.title       ?: "Merge {{ from_branch }} into {{ target_branch }}"
-    def summary         = args?.summary     ?: "Created by Buildhub run {{ build_url }}."
+    def gitData     = concurGit.getGitData()
+    def fromBranch  = args?.fromBranch  ?: env.BRANCH_NAME
+    def toBranch    = args?.toBranch    ?: yml.tools?.github?.master  ?: 'master'
+    def githubHost  = args?.host        ?: yml.tools?.github?.host    ?: gitData.host
+    def org         = args?.org         ?: gitData.org
+    def repo        = args?.repo        ?: gitData.repo
+    def title       = args?.title       ?: "Merge {{ from_branch }} into {{ target_branch }}"
+    def summary     = args?.summary     ?: "Created by Buildhub run {{ build_url }}."
 
     // env.CHANGE_FORK is set to the organization the fork is from and is only set on a PR build
     if (env.CHANGE_FORK) {
-      concurPipeline.debugPrint("workflows :: pullRequest :: create", "Skipping pull request creation for forked repo.")
+      concurPipeline.debugPrint('Workflow :: GitHub :: createPullRequest', 'Skipping pull request creation for forked repo.')
       return
     }
 
     def replaceOptions  = ['from_branch': fromBranch, 'target_branch': toBranch]
 
-    concurPipeline.debugPrint("Workflow :: PullRequest :: create", [
+    concurPipeline.debugPrint('Workflow :: GitHub :: createPullRequest', [
       'fromBranch'    : fromBranch,
       'toBranch'      : toBranch,
       'org'           : org,
@@ -36,7 +39,7 @@ public createPullRequest(yml, args) {
                                                               org,
                                                               repo,
                                                               concurUtil.mustacheReplaceAll(summary, replaceOptions))
-    concurPipeline.debugPrint("Workflow :: PullRequest :: create", ['pullRequestResult': pullRequestResult])
+    concurPipeline.debugPrint('Workflow :: GitHub :: createPullRequest', ['pullRequestResult': pullRequestResult])
     if (pullRequestResult instanceof List) {
       println "A pull request already existed and can be viewed at ${pullRequestResult[0].url}."
     } else {
@@ -44,45 +47,23 @@ public createPullRequest(yml, args) {
     }
   } catch (Exception e) {
     error("""|Failed to create pull request.
-    |---------------------
-    |Error returned:
-    |${e}""".stripMargin())
+            |---------------------
+            |Error returned:
+            |${e}""".stripMargin())
   }
 }
 
 /*
-  ******************************* REQUIRED TESTING *************************************
-  This area is for testing your workflow, and is a required part of workflow files.
-  All tests must pass in order for your workflow to be merged into the master branch.
+ ******************************* COMMON *******************************
+ This a section for common utilities being called from the runSteps method in com.concur.Commands
  */
 
-def tests(yml) {
-
-  println testHelper.header("Testing pullRequest.groovy...")
-  // Mock for the pipelines.yml used for testing
-  def fakeYml = """"""
-
-  // Mock environment data
-
-  // Job variables
-
-  // Method test
-  boolean passed = true
-  try{
-
-  } catch (e) {
-    passed = false
-    println testHelper.fail("""|Errors with pullRequest.groovy
-                                |----------------------------
-                                |$e""".stripMargin())
-  } finally {
-    if (passed) {
-      println testHelper.success("Testing for pullRequest.groovy passed")
-      env.passedTests = (env.passedTests.toInteger() + 1)
-    } else {
-      println testHelper.fail("pullRequest.groovy Testing failed")
-      env.failedTests = (env.failedTests.toInteger() + 1)
-    }
+public getStageName(Map yml, Map args, String stepName) {
+  switch(stepName) {
+    case 'createPullRequest':
+      def fromBranch  = args?.fromBranch  ?: env.BRANCH_NAME
+      def toBranch    = args?.toBranch    ?: yml.tools?.github?.master ?: 'master'
+      return (fromBranch && toBranch) ? "github: createPullRequest: $fromBranch -> $toBranch"
   }
 }
 
