@@ -63,7 +63,7 @@ public getStageName(Map yml, Map args, String stepName) {
     case 'createPullRequest':
       def fromBranch  = args?.fromBranch  ?: env.BRANCH_NAME
       def toBranch    = args?.toBranch    ?: yml.tools?.github?.master ?: 'master'
-      return (fromBranch && toBranch) ? "github: create pr: $fromBranch -> $toBranch"
+      return (fromBranch && toBranch) ? "github: createPR: $fromBranch -> $toBranch" : 'github: createPR'
     case 'createRelease':
       return 'github: create release'
   }
