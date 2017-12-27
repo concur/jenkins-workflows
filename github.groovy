@@ -6,14 +6,15 @@ concurGitHubApi = new GitHubApi()
 concurUtil      = new Util()
 
 public createPullRequest(Map yml, Map args) {
-  def gitData     = concurGit.getGitData()
-  def fromBranch  = args?.fromBranch  ?: env.BRANCH_NAME
-  def toBranch    = args?.toBranch    ?: yml.tools?.github?.master  ?: 'master'
-  def githubHost  = args?.host        ?: yml.tools?.github?.host    ?: gitData.host
-  def org         = args?.org         ?: gitData.org
-  def repo        = args?.repo        ?: gitData.repo
-  def title       = args?.title       ?: "Merge {{ from_branch }} into {{ target_branch }}"
-  def summary     = args?.summary     ?: "Created by Buildhub run {{ build_url }}."
+  Map gitData         = concurGit.getGitData()
+  String fromBranch   = args?.fromBranch  ?: env.BRANCH_NAME
+  String toBranch     = args?.toBranch    ?: yml.tools?.github?.master  ?: 'master'
+  String githubHost   = args?.host        ?: yml.tools?.github?.host    ?: gitData.host
+  Map credentials     = args?.credentials ?: yml.tools?.github?.credentials
+  String org          = args?.org         ?: gitData.org
+  String repo         = args?.repo        ?: gitData.repo
+  String title        = args?.title       ?: "Merge {{ from_branch }} into {{ target_branch }}"
+  String summary      = args?.summary     ?: "Created by Buildhub run {{ build_url }}."
 
   // env.CHANGE_FORK is set to the organization the fork is from and is only set on a PR build
   if (env.CHANGE_FORK) {
@@ -21,7 +22,7 @@ public createPullRequest(Map yml, Map args) {
     return
   }
 
-  def replaceOptions  = ['from_branch': fromBranch, 'target_branch': toBranch]
+  Map replaceOptions  = ['from_branch': fromBranch, 'target_branch': toBranch]
 
   concurPipeline.debugPrint('Workflow :: GitHub :: createPullRequest', [
     'fromBranch'    : fromBranch,
@@ -33,8 +34,8 @@ public createPullRequest(Map yml, Map args) {
     'summary'       : summary
   ])
   try {
-    def pullRequestResult = concurGitHubApi.createPullRequest(concurUtil.mustacheReplaceAll(title, replaceOptions),
-      fromBranch, toBranch, org, repo, concurUtil.mustacheReplaceAll(summary, replaceOptions))
+    Map pullRequestResult = concurGitHubApi.createPullRequest(concurUtil.mustacheReplaceAll(title, replaceOptions),
+      fromBranch, toBranch, org, repo, githubHost, concurUtil.mustacheReplaceAll(summary, replaceOptions))
     concurPipeline.debugPrint('Workflow :: GitHub :: createPullRequest', ['pullRequestResult': pullRequestResult])
     if (pullRequestResult instanceof List) {
       println "A pull request already existed and can be viewed at ${pullRequestResult[0].url}."
