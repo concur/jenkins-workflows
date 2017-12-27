@@ -35,7 +35,13 @@ public createPullRequest(Map yml, Map args) {
   ])
   try {
     Map pullRequestResult = concurGitHubApi.createPullRequest(concurUtil.mustacheReplaceAll(title, replaceOptions),
-      fromBranch, toBranch, org, repo, githubHost, concurUtil.mustacheReplaceAll(summary, replaceOptions))
+                                                              fromBranch,
+                                                              toBranch,
+                                                              org,
+                                                              repo,
+                                                              githubHost,
+                                                              credentials,
+                                                              concurUtil.mustacheReplaceAll(summary, replaceOptions))
     concurPipeline.debugPrint('Workflow :: GitHub :: createPullRequest', ['pullRequestResult': pullRequestResult])
     if (pullRequestResult instanceof List) {
       println "A pull request already existed and can be viewed at ${pullRequestResult[0].url}."
