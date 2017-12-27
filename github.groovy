@@ -9,7 +9,7 @@ public createPullRequest(Map yml, Map args) {
   Map gitData         = concurGit.getGitData()
   String fromBranch   = args?.fromBranch  ?: env.BRANCH_NAME
   String toBranch     = args?.toBranch    ?: yml.tools?.github?.master  ?: 'master'
-  String githubHost   = args?.host        ?: yml.tools?.github?.host    ?: gitData.host
+  String githubHost   = args?.host        ?: yml.tools?.github?.host
   Map credentials     = args?.credentials ?: yml.tools?.github?.credentials
   String org          = args?.org         ?: gitData.org
   String repo         = args?.repo        ?: gitData.repo
@@ -31,6 +31,7 @@ public createPullRequest(Map yml, Map args) {
     'repo'          : repo,
     'replaceOptions': replaceOptions,
     'title'         : title,
+    'githubHost'    : githubHost,
     'summary'       : summary
   ])
   try {
