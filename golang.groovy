@@ -1,14 +1,145 @@
 import com.concur.*;
 
+workflowDoc = '''
+overview: Steps for building and testing with Golang.
+additional_resources:
+  - name: Glide
+    url: https://github.com/Masterminds/glide
+  - name: Godep
+    url: https://github.com/tools/godep
+  - name: Golang
+    url: https://golang.org
+tools:
+  - type: String
+    name: buildImage
+    section: golang
+    required: true
+    description: Docker image that has Golang/Glide/Godep installed.
+  - type: List
+    name: additionalArgs
+    section: glide
+    description: Any additional arguments to Glide as a YAML style List.
+  - type: String
+    name: command
+    section: glide
+    default: install
+    description: Which Glide command to run.
+  - type: List
+    name: additionalArgs
+    section: godep
+    description: Any additional arguments to Godep as a YAML style List.
+  - type: String
+    name: command
+    section: godep
+    default: restore
+    description: Which Godep command to run.
+  - type: String
+    name: goPath
+    section: golang
+    default: determined by SCM
+    description: The path within the container to mount the project into.
+  - type: String
+    name: outFile
+    section: golang
+    description: Where the built Go binary will be put instead of the current directory.
+  - type: Map
+    name: env
+    section: golang
+    description: Setup for the build environment, for example setting GOOS or GOARCH.
+  - type: List
+    name: additionalArgs
+    section: golang
+    description: Any additional arguments to `go build` as a YAML style List.
+  - type: String
+    name: mainPath
+    section: golang
+    description: Path to the main .go file to build.
+  - type: List
+    name: additionalArgs
+    section: test
+    description: Additional arguments to the test binary specified
+  - type: String
+    name: binary
+    section: test
+    default: go test
+    description: The binary to use for the test, in case a different framework is being used.
+  - type: String
+    name: resultsPath
+    section: test
+    default: test_results
+    description: If a test framework, such as Gingko, that can output to Junit is being used this is the path to the directory.
+  - type: Boolean
+    section: golang
+    name: gatherJunit
+    default: false
+    description: If a test framework, such as Gingko, that can output to Junit this will ensure that the test results are published in Jenkins.
+  - type: String
+    name: junitPattern
+    section: golang
+    default: ${resultsPath}/*.xml
+    description: An ant style pattern for the junit plugin, should match where your test results get stored.
+full_example:
+  pipelines:
+    tools:
+      github:
+        patterns:
+          feature: .+
+    branches:
+      feature:
+        steps:
+          - golang:
+            - glide:
+            - test:
+                binary: ginkgo
+                gatherJunit: true
+            - build:
+                mainPath: cmd/app/main.go
+                outFile: publish/app
+                env:
+                  GOOS: darwin
+                  GOARCH: amd64
+'''
+
 concurPipeline  = new Commands()
 concurGit       = new Git()
 concurUtil      = new Util()
 
+/*
+description: Vendor Package Management for your Go projects.
+parameters:
+  - type: String
+    name: buildImage
+    required: true
+    description: Docker image that has Glide installed.
+  - type: List
+    name: additionalArgs
+    description: Any additional arguments to Glide as a YAML style List.
+  - type: String
+    name: command
+    default: install
+    description: Which Glide command to run.
+  - type: String
+    name: goPath
+    default: determined by SCM
+    description: The path within the container to mount the project into.
+example:
+  branches:
+    feature:
+      steps:
+        - golang:
+            # Simple
+            - glide:
+            # Advanced
+            - glide:
+                command: install
+                additionalArgs:
+                  - "--force"
+ */
 public glide(Map yml, Map args) {
-  def dockerImage     = args?.buildImage      ?: yml.tools?.golang?.buildImage
-  def additionalArgs  = args?.additionalArgs  ?: yml.tools?.glide?.additionalArgs
-  def goPath          = args?.goPath          ?: yml.tools?.golang?.goPath        ?: getGoPath()
-  def command         = args?.command         ?: "install"
+  String dockerImage  = args?.buildImage      ?: yml.tools?.golang?.buildImage
+  List additionalArgs = args?.additionalArgs  ?: yml.tools?.glide?.additionalArgs
+  String command      = args?.command         ?: yml.tools?.glide?.command        ?: "install"
+  String goPath       = args?.goPath          ?: yml.tools?.golang?.goPath        ?: getGoPath()
 
   assert goPath      : "Workflows :: Golang :: glide :: [goPath] is required in [tools.golang] or as a parameter to the test step."
   assert dockerImage : "Workflows :: Golang :: glide :: [buildImage] is needed in [tools.golang] or as a parameter to the test step."
@@ -18,26 +149,17 @@ public glide(Map yml, Map args) {
   def glideCommand = "glide ${command}"
 
   /**
-   * Define additional args as any of the following
+   * Define additional args like the following
    * ----------------------------------------------
-   * golang:
-   *   - glide:
-   *       additionalArgs: "--force --skip-test -v"
-   * ----------------------------------------------
-   * golang:
+   * - golang:
    *   - glide:
    *       additionalArgs:
    *         - "--force"
    *         - "--skip-test"
    *         - "-v"
-   * ----------------------------------------------
    */
   if (additionalArgs) {
-    if (additionalArgs instanceof List) {
-      glideCommand = "${glideCommand} ${additionalArgs.join(' ')}"
-    } else {
-      glideCommand = "${glideCommand} ${additionalArgs}"
-    }
+    glideCommand = "$glideCommand ${additionalArgs.join(' ')}"
   }
 
   glideCommand = concurUtil.mustacheReplaceAll(glideCommand)
@@ -57,40 +179,60 @@ public glide(Map yml, Map args) {
   })
 }
 
+/*
+description: Godep is a tool for managing Go package dependencies.
+parameters:
+  - type: String
+    name: buildImage
+    required: true
+    description: Docker image that has Godep installed.
+  - type: List
+    name: additionalArgs
+    description: Any additional arguments to Godep as a YAML style List.
+  - type: String
+    name: command
+    default: restore
+    description: Which Godep command to run.
+  - type: String
+    name: goPath
+    default: determined by SCM
+    description: The path within the container to mount the project into.
+example:
+  branches:
+    feature:
+      steps:
+        - golang:
+            # Simple
+            - godep:
+            # Advanced
+            - godep:
+                command: update
+                additionalArgs:
+                  - "-v"
+                  - "-goversion"
+ */
 public godep(Map yml, Map args) {
-  def dockerImage     = args?.buildImage      ?: yml.tools?.golang?.buildImage
-  def additionalArgs  = args?.additionalArgs  ?: yml.tools?.glide?.additionalArgs
-  def command         = args?.command         ?: "ensure"
-  def goPath          = args?.goPath          ?: yml.tools?.golang?.goPath        ?: getGoPath()
+  String dockerImage  = args?.buildImage      ?: yml.tools?.golang?.buildImage
+  List additionalArgs = args?.additionalArgs  ?: yml.tools?.godep?.additionalArgs
+  String command      = args?.command         ?: yml.tools?.godep?.command        ?: "restore"
+  String goPath       = args?.goPath          ?: yml.tools?.golang?.goPath        ?: getGoPath()
 
   assert goPath      : "Workflows :: Golang :: godep :: [goPath] is required in [tools.golang] or as a parameter to the test step."
   assert dockerImage : "Workflows :: Golang :: godep :: [buildImage] is needed in [tools.golang] or as a parameter to the test step."
 
-  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
-
   def godepCommand = "godep ${command}"
-
   /**
    * Define additional args as any of the following
    * ----------------------------------------------
-   * golang:
-   *   - godep:
-   *       additionalArgs: "--force --skip-test -v"
-   * ----------------------------------------------
-   * golang:
+   * - golang:
    *   - godep:
    *       additionalArgs:
    *         - "--force"
    *         - "--skip-test"
    *         - "-v"
-   * ----------------------------------------------
    */
   if (additionalArgs) {
-    if (additionalArgs instanceof List) {
-      godepCommand = "${godepCommand} ${additionalArgs.join(' ')}"
-    } else {
-      godepCommand = "${godepCommand} ${additionalArgs}"
-    }
+    godepCommand = "$godepCommand ${additionalArgs.join(' ')}"
   }
 
   godepCommand = concurUtil.mustacheReplaceAll(godepCommand)
@@ -109,28 +251,60 @@ public godep(Map yml, Map args) {
   })
 }
 
+/*
+description: Build a Golang project.
+parameters:
+  - type: String
+    name: buildImage
+    required: true
+    description: Docker image that has any Golang installed.
+  - type: String
+    name: goPath
+    default: determined by SCM
+    description: The path within the container to mount the project into.
+  - type: String
+    name: outFile
+    section: golang
+    description: Where the built Go binary will be put instead of the current directory.
+  - type: Map
+    name: env
+    section: golang
+    description: Setup for the build environment, for example setting GOOS or GOARCH.
+  - type: String
+    name: mainPath
+    section: golang
+    description: Path to the main .go file to build.
+example:
+  branches:
+    feature:
+      steps:
+        - golang:
+            # Simple
+            - build:
+            # Advanced
+            - build:
+                outFile: "publish/example-binary"
+                mainPath: "cmd/app/main.go"
+                env:
+                  GOOS: linux
+                  GOARCH: amd64
+ */
 public build(Map yml, Map args) {
-  def dockerImage     = args?.buildImage    ?: yml.tools?.golang?.buildImage
-  def outFile         = args?.outFile       ?: yml.tools?.golang?.outFile
-  def goEnv           = args?.env           ?: yml.tools?.golang?.env
-  def mainPath        = args?.mainPath      ?: yml.tools?.golang?.mainPath
-  def goPath          = args?.goPath        ?: yml.tools?.golang?.goPath    ?: getGoPath()
-  def additionalArgs  = args?.additionalArgs
+  String dockerImage  = args?.buildImage      ?: yml.tools?.golang?.buildImage
+  String outFile      = args?.outFile         ?: yml.tools?.golang?.outFile
+  Map goEnv           = args?.env             ?: yml.tools?.golang?.env
+  String mainPath     = args?.mainPath        ?: yml.tools?.golang?.mainPath
+  List additionalArgs = args?.additionalArgs  ?: yml.tools?.golang?.additionalArgs
+  String goPath       = args?.goPath          ?: yml.tools?.golang?.goPath          ?: getGoPath()
 
   assert goPath      : "Workflows :: Golang :: build :: [goPath] is required in [tools.golang] or as a parameter to the test step."
   assert dockerImage : "Workflows :: Golang :: build :: [buildImage] is needed in [tools.golang] or as a parameter to the test step."
 
-  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
-
   def goCommand = "go build"
 
   if (goEnv) {
-    if (goEnv instanceof Map) {
-      def envStr = goEnv.collect { "${it.key}=${it.value}" }.join(' ')
-      goCommand = "${envStr} ${goCommand}"
-    } else {
-      goCommand = "${goEnv} ${goCommand}"
-    }
+    def envStr = goEnv.collect { "${it.key}=${it.value}" }.join(' ')
+    goCommand = "${envStr} ${goCommand}"
   }
 
   if (outFile) {
@@ -140,11 +314,7 @@ public build(Map yml, Map args) {
   /**
    * Define additional args as any of the following
    * ----------------------------------------------
-   * golang:
-   *   - build:
-   *       additionalArgs: "-a -n -p 5"
-   * ----------------------------------------------
-   * golang:
+   * - golang:
    *   - build:
    *       additionalArgs:
    *         - "-a"
@@ -153,11 +323,7 @@ public build(Map yml, Map args) {
    * ----------------------------------------------
    */
   if (additionalArgs) {
-    if (additionalArgs instanceof List) {
-      goCommand = "${goCommand} ${additionalArgs.join(' ')}"
-    } else {
-      goCommand = "${goCommand} ${additionalArgs}"
-    }
+    goCommand = "${goCommand} ${additionalArgs.join(' ')}"
   }
 
   if (mainPath) {
@@ -180,44 +346,78 @@ public build(Map yml, Map args) {
   })
 }
 
+/*
+description: Build a Golang project.
+parameters:
+  - type: String
+    name: buildImage
+    required: true
+    description: Docker image that has any Golang installed.
+  - type: String
+    name: goPath
+    default: determined by SCM
+    description: The path within the container to mount the project into.
+  - type: List
+    name: additionalArgs
+    description: Any additional arguments to Glide as a YAML style List.
+  - type: String
+    name: binary
+    default: go test
+    description: The binary to use for the test, in case a different framework is being used.
+  - type: String
+    name: resultsPath
+    default: test_results
+    description: If a test framework, such as Gingko, that can output to Junit is being used this is the path to the directory.
+  - type: Boolean
+    name: gatherJunit
+    default: false
+    description: If a test framework, such as Gingko, that can output to Junit this will ensure that the test results are published in Jenkins.
+  - type: String
+    name: junitPattern
+    default: ${resultsPath}/*.xml
+    description: An ant style pattern for the junit plugin, should match where your test results get stored.
+example:
+  branches:
+    feature:
+      steps:
+        - golang:
+            # Simple
+            - test:
+            # Advanced
+            - test:
+                binary: ginkgo
+                additionalArgs:
+                  - "./..."
+                gatherJunit: true
+                resultsPath: results
+ */
 public test(Map yml, Map args) {
-  def dockerImage     = args?.buildImage      ?: yml.tools?.golang?.buildImage
-  def additionalArgs  = args?.additionalArgs  ?: yml.tools?.golang?.additionalArgs
-  def goPath          = args?.goPath          ?: yml.tools?.golang?.goPath          ?: getGoPath()
-  def testBinary      = args?.binary          ?: yml.tools?.golang?.testBinary      ?: "go test"
-  def resultsPath     = args?.resultsPath     ?: yml.tools?.golang?.testResultsPath ?: "test_results"
-  def gatherJunit     = args?.gatherJunit     ?: yml.tools?.golang?.gatherJunit     ?: false
-  def junitPattern    = args?.junitPattern    ?: yml.tools?.golang?.junitPattern    ?: "${resultsPath}/*.xml"
+  String dockerImage  = args?.buildImage      ?: yml.tools?.golang?.buildImage
+  List additionalArgs = args?.additionalArgs  ?: yml.tools?.golang?.test?.additionalArgs
+  String goPath       = args?.goPath          ?: yml.tools?.golang?.goPath            ?: getGoPath()
+  String testBinary   = args?.binary          ?: yml.tools?.golang?.test?.binary      ?: "go test"
+  String resultsPath  = args?.resultsPath     ?: yml.tools?.golang?.test?.resultsPath ?: "test_results"
+  Boolean gatherJunit = args?.gatherJunit     ?: yml.tools?.golang?.gatherJunit       ?: false
+  String junitPattern = args?.junitPattern    ?: yml.tools?.golang?.junitPattern      ?: "${resultsPath}/*.xml"
 
   assert dockerImage  : "Workflows :: Golang :: [buildImage] is needed in [tools.golang] or as a parameter to the test step."
   assert goPath       : "Workflows :: Golang :: [goPath] is required in [tools.golang] or as a parameter to the test step."
   assert junitPattern : "Workflows :: Golang :: [junitPattern] is required in [tools.golang] or as a parameter to the test step."
 
-  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
-
-  def testCommand = testBinary
+  String testCommand = testBinary
 
   /**
    * Define additional args as any of the following
    * ----------------------------------------------
-   * golang:
-   *   - test:
-   *       additionalArgs: "-a -n -p 5"
-   * ----------------------------------------------
-   * golang:
+   * - golang:
    *   - test:
    *       additionalArgs:
    *         - "-a"
    *         - "-n"
    *         - "-p 5"
-   * ----------------------------------------------
    */
   if (additionalArgs) {
-    if (additionalArgs instanceof List) {
-      testCommand = "${testCommand} ${additionalArgs.join(' ')}"
-    } else {
-      testCommand = "${testCommand} ${additionalArgs}"
-    }
+    testCommand = "${testCommand} ${additionalArgs.join(' ')}"
   }
   
   def shCmd = "cd ${goPath} && mkdir -p ${goPath}/${resultsPath} && ${testCommand}"
@@ -249,16 +449,15 @@ private getGoPath() {
 }
 
 private runCommandInDockerImage(String dockerImage, String goPath, Closure work) {
+  dockerImage = concurUtil.mustacheReplaceAll(dockerImage)
   docker.image(dockerImage).inside("-u 0:0 -v ${pwd()}:${goPath}") {
     work()
   }
 }
 
 /*
- ******************************* COMMON *******************************
- This a section for common utilities being called from the runSteps method in com.concur.Commands
+ * Set the name of the stage dynamically.
  */
-
 public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
     case 'glide':

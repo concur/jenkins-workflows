@@ -1,11 +1,175 @@
 import com.concur.*;
 
+workflowDoc = '''
+overview: Execute Ansible playbooks within a pipeline.
+additional_resources:
+  - name: Ansible
+    url: https://docs.ansible.com/ansible/latest/playbooks.html
+tools:
+  - type: String
+    name: buildImage
+    required: true
+    description: Docker image that has Ansible installed.
+  - type: String
+    name: playbook
+    required: true
+    description: Path to the playbook file used during this run
+  - type: String
+    name: inventory
+    required: true
+    description: Path to an inventory file to run the playbook against
+  - type: String
+    name: limit
+    required: false
+    description: Equivalent to `-l` or `--limit` only run against specific host groups.
+  - type: String
+    name: sudoUser
+    required: false
+    default: root
+    description: Equivalent to `--become-user`.
+  - type: Map
+    name: credentials
+    required: false
+    description: Key/Value pair of the credentials to use when running the playbook
+  - type: Map
+    name: extraVars
+    required: false
+    description: equivalent to `-e` or `--extra-vars` overwrite variables
+  - type: List
+    name: tags
+    required: false
+    description: Run only specific tags during the playbook run
+  - type: List
+    name: skippedTags
+    required: false
+    description: Skip the specified tags during the playbook run
+  - type: List
+    name: extras
+    required: false
+    description: Additional arguments to the `ansible-playbook` command
+  - type: Boolean
+    name: sudo
+    required: false
+    default: false
+    description: Equivalent to `-b` or `--become`.
+  - type: int
+    name: forks
+    required: false
+    default: 10
+    description: Equivalent to `-f` or `--forks` specify number of parallel processes to use.
+  - type: int
+    name: verbosity
+    required: false
+    description: Levels of verbose output to have. Example setting this to 2 would be the equivalent of -vv
+full_example:
+  pipelines:
+    tools:
+      ansible:
+        credentials:
+          description: "SSH deploy credentials"
+        buildImage: "{{ quay_uri }}/da-workflow/ansible-alpine:2.4.1.0"
+        playbook: "ansible/playbooks/app_deploy.yml"
+        inventory: "ansible/app_inventory.yml"
+      github:
+        patterns:
+          master: master
+          develop: develop
+          feature: .+
+    branches:
+      feature:
+        steps:
+          - custom: # This should be your build process
+            - buildPackage:
+          - ansible:
+            - playbook:
+                limit: staging
+      master:
+        steps:
+          - github:
+            - createRelease:
+          - ansible:
+            - playbook:
+                limit: production
+'''
+
 concurArtUtil   = new ArtifactoryUtil()
 concurPipeline  = new Commands()
 concurUtil      = new Util()
 concurGit       = new Git()
 
-public playbook(yml, args) {
+/*
+description: Execute an Ansible playbook
+parameters:
+  - type: String
+    name: buildImage
+    required: true
+    description: Docker image that has Ansible installed.
+  - type: String
+    name: playbook
+    required: true
+    description: Path to the playbook file used during this run
+  - type: String
+    name: inventory
+    required: true
+    description: Path to an inventory file to run the playbook against
+  - type: String
+    name: limit
+    required: false
+    description: Equivalent to `-l` or `--limit` only run against specific host groups.
+  - type: String
+    name: sudoUser
+    required: false
+    default: root
+    description: Equivalent to `--become-user`.
+  - type: Map
+    name: credentials
+    required: false
+    description: Key/Value pair of the credentials to use when running the playbook
+  - type: Map
+    name: extraVars
+    required: false
+    description: equivalent to `-e` or `--extra-vars` overwrite variables
+  - type: List
+    name: tags
+    required: false
+    description: Run only specific tags during the playbook run
+  - type: List
+    name: skippedTags
+    required: false
+    description: Skip the specified tags during the playbook run
+  - type: List
+    name: extras
+    required: false
+    description: Additional arguments to the `ansible-playbook` command
+  - type: Boolean
+    name: sudo
+    required: false
+    default: false
+    description: Equivalent to `-b` or `--become`.
+  - type: int
+    name: forks
+    required: false
+    default: 10
+    description: Equivalent to `-f` or `--forks` specify number of parallel processes to use.
+  - type: int
+    name: verbosity
+    required: false
+    description: Levels of verbose output to have. Example setting this to 2 would be the equivalent of -vv
+example:
+  branches:
+    feature:
+      steps:
+        - ansible:
+            # Simple
+            - playbook:
+            # Advanced
+            - playbook:
+                playbook: scripts/ansible/example-playbook.yml
+                extraVars:
+                  DOCKER_IMAGE: "{{ DOCKER_IMAGE_TAG }}"
+                limit: qa
+ */
+public playbook(Map yml, Map args) {
   String dockerImage  = args?.buildImage  ?: yml.tools?.ansible?.buildImage
   String playbook     = args?.playbook    ?: yml.tools?.ansible?.playbook
   String inventory    = args?.inventory   ?: yml.tools?.ansible?.inventory
@@ -87,10 +251,8 @@ public playbook(yml, args) {
 }
 
 /*
- ******************************* COMMON *******************************
- This a section for common utilities being called from the runSteps method in com.concur.Commands
+ * Set the name of the stage dynamically.
  */
-
 public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
     case 'playbook':

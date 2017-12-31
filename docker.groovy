@@ -1,9 +1,80 @@
 import org.codehaus.groovy.runtime.GStringImpl;
 
+workflowDoc = '''
+additional_resources:
+  - name: Promotion - Artifactory
+    url: https://wiki.concur.com/confluence/display/DA/Promotion+-+Artifactory
+  - name: Docker build documentation
+    url: https://docs.docker.com/engine/reference/commandline/build/
+  - name: Docker push documentation
+    url: https://docs.docker.com/engine/reference/commandline/push/
+full_example:
+  pipelines:
+    tools:
+      docker:
+        dockerfile: production.dockerfile
+        credentials:
+          description: example docker creds
+      github:
+        patterns:
+          feature: .+
+    branches:
+      feature:
+        steps:
+          - docker: # This should be your build process
+            - build:
+                buildArgs:
+                  CommitSha: "{{ git_commit }}"
+                  BuildDate: "{{ timestamp }}"
+                  BuildVersion: "{{ build_version }}"
+            - push:
+                additionalTags:
+                  - "{{ git_commit }}"
+'''
+
 concurPipeline  = new com.concur.Commands()
 concurUtil      = new com.concur.Util()
 concurGit       = new com.concur.Git()
 
+/*
+description: Build a Docker image
+parameters:
+  - type: String
+    name: dockerfile
+    description: Path to a dockerfile to build, equivalent to `-f <dockerfile>`.
+  - type: String
+    name: imageName
+    default: "<git_org>/<git_repo>"
+    description: What to name the image, equivalent to `-t <imageName>`.
+  - type: String
+    name: imageTag
+    default: buildVersion
+    description: What to name the image, equivalent to `-t <imageName>:<imageTag>`.
+  - type: String
+    name: contextPath
+    default: .
+    description: Path to the directory to start the Docker build, equivalent to the final argument to docker build command.
+  - type: String
+    name: vcsUrl
+    default: https://<git_host>/<git_org>/<git_repo>
+  - type: Map
+    name: buildArgs
+    description: A map of arguments to pass to docker build command, equivalent to `--build-arg <key>=<value>` 
+example:
+  branches:
+    feature:
+      steps:
+        - docker:
+            # Simple
+            - build:
+            # Advanced
+            - build:
+                dockerfile: production.dockerfile
+                buildArgs:
+                  CommitSha: "{{ git_commit }}"
+                  BuildDate: "{{ timestamp }}"
+                  BuildVersion: "{{ build_version }}"
+ */
 public build(Map yml, Map args) {
   String baseVersion  = yml.general?.version?.base  ?: "0.1.0"
   String buildVersion = concurGit.getVersion(baseVersion)
@@ -46,6 +117,40 @@ public build(Map yml, Map args) {
   docker.build(fullImageName, additionalArgs)
 }
 
+/*
+description: Push a Docker image to a remote registry.
+parameters:
+  - name: imageName
+    type: String
+    default: "<git_org>/<git_repo>"
+    description: The name of the image to push.
+  - name: imageTag
+    type: String
+    default: buildVersion
+    description: Tag of the image to push.
+  - name: uri
+    type: String
+    description: The uri of the registry to push to, such as quay.io or hub.docker.com.
+  - name: additionalTags
+    type: List
+    description: A list of tags to push in addition to `imageTag` above.
+  - name: credentials
+    type: Map
+    description: A map of criteria to use to search for your credential
+example:
+  branches:
+    feature:
+      steps:
+        - docker:
+            # Simple
+            - push:
+            # Advanced
+            - push:
+                credentials:
+                  description: example docker creds
+                additionalTags:
+                  - "{{ git_commit }}"
+ */
 public push(Map yml, Map args) {
   String baseVersion    = yml.general?.version?.base ?: "0.1.0"
   String buildVersion   = concurGit.getVersion(baseVersion)
@@ -88,7 +193,6 @@ public push(Map yml, Map args) {
     'additionalTags'      : additionalTags
   ])
 
-  println "image not pushed"
   withCredentials([usernamePassword(credentialsId: dockerCredentialId, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
     // using this instead of withRegistry because of various errors encountered when using it in production.
     sh "docker logout ${dockerEndpoint}"
@@ -105,10 +209,8 @@ public push(Map yml, Map args) {
 }
 
 /*
- ******************************* COMMON *******************************
- This a section for common utilities being called from the runSteps method in com.concur.Commands
+ * Set the name of the stage dynamically.
  */
-
 public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
     case 'build':

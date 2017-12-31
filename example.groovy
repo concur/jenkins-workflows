@@ -1,10 +1,11 @@
+import 
 public work(Map yml, Map args) {
   println "yml :: $yml"
   println "args :: $args"
 }
 
 /*
- * Allow the Workflow execution to determine how to name each stage.
+ * Set the name of the stage dynamically.
  */
 public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
