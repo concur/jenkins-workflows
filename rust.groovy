@@ -10,6 +10,7 @@ additional_resources:
 tools:
   - type: String
     name: buildImage
+    required: true
     description: Docker image containg tools for Rust.
   - type: List
     name: additionalArgs
@@ -21,7 +22,7 @@ tools:
     name: command
     description: Which cargo command to execute.
     default: build
-full_example:
+full_example: |
   pipelines:
     tools:
       branches:

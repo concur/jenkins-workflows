@@ -18,7 +18,7 @@
 | env            |            | Map     |                        | golang    | Setup for the build environment, for example setting GOOS or GOARCH.                                                           |
 | additionalArgs |            | List    |                        | golang    | Any additional arguments to `go build` as a YAML style List.                                                                   |
 | mainPath       |            | String  |                        | golang    | Path to the main .go file to build.                                                                                            |
-| additionalArgs |            | List    |                        | test      | Additional arguments to the test binary specified                                                                              |
+| additionalArgs |            | List    |                        | test      | Additional arguments to the test binary specified.                                                                             |
 | binary         |            | String  | `go test`              | test      | The binary to use for the test, in case a different framework is being used.                                                   |
 | resultsPath    |            | String  | `test_results`         | test      | If a test framework, such as Gingko, that can output to Junit is being used this is the path to the directory.                 |
 | gatherJunit    |            | Boolean | `False`                | golang    | If a test framework, such as Gingko, that can output to Junit this will ensure that the test results are published in Jenkins. |
@@ -139,24 +139,24 @@ branches:
 
 ```yaml
 pipelines:
-  branches:
-    feature:
-      steps:
-      - golang:
-        - glide:
-        - test:
-            binary: ginkgo
-            gatherJunit: true
-        - build:
-            env:
-              GOARCH: amd64
-              GOOS: darwin
-            mainPath: cmd/app/main.go
-            outFile: publish/app
   tools:
     branches:
       patterns:
         feature: .+
+  branches:
+    feature:
+      steps:
+        - golang:
+          - glide:
+          - test:
+              binary: ginkgo
+              gatherJunit: true
+          - build:
+              mainPath: cmd/app/main.go
+              outFile: publish/app
+              env:
+                GOOS: darwin
+                GOARCH: amd64
 ```
 
 ## Additional Resources

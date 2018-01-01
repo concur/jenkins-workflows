@@ -57,7 +57,7 @@ tools:
   - type: List
     name: additionalArgs
     section: test
-    description: Additional arguments to the test binary specified
+    description: Additional arguments to the test binary specified.
   - type: String
     name: binary
     section: test
@@ -78,7 +78,7 @@ tools:
     section: golang
     default: ${resultsPath}/*.xml
     description: An ant style pattern for the junit plugin, should match where your test results get stored.
-full_example:
+full_example: |
   pipelines:
     tools:
       branches:
