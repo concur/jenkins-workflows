@@ -177,7 +177,7 @@ def create_index_markdown(groovy_files, docs_folder):
         workflow_name = os.path.splitext(groovy_file)[0]
         lines.append(f"* [{workflow_name.title()}]({workflow_name.upper()}.md)")
 
-    with open(os.path.join(docs_folder, 'INDEX.md'), 'w') as w:
+    with open(os.path.join(docs_folder, 'index.md'), 'w') as w:
         w.write('\n'.join(lines))
 
 

@@ -1,4 +1,5 @@
-import 
+import com.concur.*;
+
 public work(Map yml, Map args) {
   println "yml :: $yml"
   println "args :: $args"

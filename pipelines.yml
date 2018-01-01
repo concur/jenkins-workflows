@@ -4,6 +4,7 @@ pipelines:
   tools:
     branches:
       patterns:
+        master: master
         feature: .+
     git:
       credentials:
@@ -20,6 +21,10 @@ pipelines:
     slack:
       channel: git-notifications
   branches:
+    master:
+      steps:
+        - example:
+          - work:
     feature:
       steps:
         - python:
