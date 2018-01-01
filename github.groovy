@@ -19,7 +19,7 @@ tools:
 full_example:
   pipelines:
     tools:
-      github:
+      branches:
         patterns:
           master: master
           develop: develop
@@ -115,30 +115,22 @@ public createPullRequest(Map yml, Map args) {
   List prTemplates = findFiles glob: '.github/PULL_REQUEST_TEMPLATE*'
 
   if (prTemplates.size() > 0) {
-    String templateContents = readFile(prTemplates[0])
+    println "Pull Request template found, using that instead of provided summary..."
+    String templateContents = readFile(prTemplates[0].toString())
     summary = concurUtil.mustacheReplaceAll(templateContents)
   }
 
-  try {
-    Map pullRequestResult = concurGitHubApi.createPullRequest(concurUtil.mustacheReplaceAll(title, replaceOptions),
-                                                              fromBranch,
-                                                              toBranch,
-                                                              org,
-                                                              repo,
-                                                              githubHost,
-                                                              credentials,
-                                                              concurUtil.mustacheReplaceAll(summary, replaceOptions))
-    concurPipeline.debugPrint('Workflow :: GitHub :: createPullRequest', ['pullRequestResult': pullRequestResult])
-    if (pullRequestResult instanceof List) {
-      println "A pull request already existed and can be viewed at ${pullRequestResult[0].url}."
-    } else {
-      println "Created pull request created and can be viewed at ${pullRequestResult.url}."
-    }
-  } catch (Exception e) {
-    error("""|Failed to create pull request.
-            |---------------------
-            |Error returned:
-            |${e}""".stripMargin())
+  Map pullRequestResult = concurGitHubApi.createPullRequest(concurUtil.mustacheReplaceAll(title, replaceOptions),
+                                                            fromBranch,
+                                                            toBranch,
+                                                            org,
+                                                            repo,
+                                                            githubHost,
+                                                            credentials,
+                                                            concurUtil.mustacheReplaceAll(summary, replaceOptions))
+  concurPipeline.debugPrint('Workflow :: GitHub :: createPullRequest', ['pullRequestResult': pullRequestResult])
+  if (pullRequestResult instanceof List) {
+    println "A pull request already existed and can be viewed at ${pullRequestResult[0].url}."
   }
 }
 

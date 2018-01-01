@@ -1,0 +1,37 @@
+pipelines:
+  general:
+    debug: true
+  tools:
+    branches:
+      patterns:
+        feature: .+
+    git:
+      credentials:
+        description: GitHub Username/Password
+    github:
+      credentials:
+        description: GitHub Secret Text Access Token
+    python:
+      buildImage: python:3.6-alpine3.7
+      binary: python3
+    jenkins:
+      workflows:
+        branch: pipeline
+    slack:
+      channel: git-notifications
+  branches:
+    feature:
+      steps:
+        - python:
+          - script:
+              file: scripts/generate_docs.py
+              requirements: scripts/requirements.txt
+              arguments:
+                - "-o docs"
+        - git:
+          - commit:
+              message: "Automatic documentation generated."
+              push: true
+              forceAdd: true
+        - github:
+          - createPullRequest:

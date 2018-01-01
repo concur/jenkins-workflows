@@ -1,13 +1,14 @@
-import re
 import os
+import re
 import sys
-
+import textwrap
 import yaml
-from tabulate import tabulate
-from argparse import ArgumentParser
 
-method_def_regex = re.compile('^public (?P<method_name>.+?)\((?P<method_args>.+?)\) \{$')
-method_end_regex = re.compile('^\}$')
+from argparse import ArgumentParser
+from tabulate import tabulate
+
+METHOD_DEF_REGEX = re.compile(r'^public (?P<method_name>.+?)\((?P<method_args>.+?)\) \{$')
+METHOD_END_REGEX = re.compile(r'^\}$')
 
 
 class Arg:
@@ -56,9 +57,9 @@ def parse_file(file_lines):
     for i, f in enumerate(file_lines):
         if f == '\n':
             continue
-        line_is_method_def = method_def_regex.match(f)
+        line_is_method_def = METHOD_DEF_REGEX.match(f)
         if function_start_line != 0:
-            if method_end_regex.match(f):
+            if METHOD_END_REGEX.match(f):
                 function_end_line = i
                 function_doc_lines = []
                 if file_lines[function_start_line-1].strip() == '*/':
@@ -105,7 +106,12 @@ def parse_yaml(text):
     return yaml.load(text)
 
 
+def represent_none(self, _):
+    return self.represent_scalar('tag:yaml.org,2002:null', '')
+
+
 def to_yaml(contents):
+    yaml.add_representer(type(None), represent_none)
     return yaml.dump(contents, default_flow_style=False)
 
 
@@ -160,11 +166,26 @@ def create_markdown_table(values):
     return tabulate(rows, [x.title() for x in columns], tablefmt="pipe")
 
 
+def create_index_markdown(groovy_files, docs_folder):
+    print('Generating index.md ...')
+    lines = []
+    lines.append('# Welcome to Workflows for Jenkins\n')
+    lines.append('These workflows were originally created by the Workflow team at Concur.')
+    lines.append('The goal is to help developers more quickly and easily take advantage of Jenkins pipelines without the need to write complex Jenkinsfiles.')
+    lines.append('\n## Available Workflows\n')
+    for groovy_file in groovy_files:
+        workflow_name = os.path.splitext(groovy_file)[0]
+        lines.append(f"* [{workflow_name.title()}]({workflow_name.upper()}.md)")
+
+    with open(os.path.join(docs_folder, 'INDEX.md'), 'w') as w:
+        w.write('\n'.join(lines))
+
+
 def create_markdown_doc(name, docs_folder, workflow_doc, functions):
     if not os.path.exists(docs_folder):
         os.mkdir(docs_folder)
     lines = [f"# {name.replace('.groovy', '').title()}"]
-    if workflow_doc is not None and len(workflow_doc) > 0:
+    if workflow_doc:
         file_docs = parse_yaml(str('\n'.join(workflow_doc)))
         overview = file_docs.get('overview')
         if overview:
@@ -212,10 +233,12 @@ def entry_point():
         exit(1)
 
     path = os.path.join(os.path.dirname(sys.argv[0]), '..')
-    for fil in [x for x in os.listdir(path) if x.endswith('.groovy')]:
+    groovy_files = [x for x in os.listdir(path) if x.endswith('.groovy')]
+    for fil in groovy_files:
         if fil.startswith('example'):
             continue
         with open(os.path.join(path, fil)) as groovy_file:
+            print(f"Generating documentation for {fil}...")
             lines = groovy_file.read().splitlines()
             workflow_doc = get_workflow_doc(lines)
             functions = parse_file(lines)
@@ -223,6 +246,7 @@ def entry_point():
                                 docs_folder=os.path.join(path, args.out_path),
                                 workflow_doc=workflow_doc,
                                 functions=functions)
+    create_index_markdown(groovy_files, os.path.join(path, args.out_path))
 
 
 if __name__ == '__main__':
