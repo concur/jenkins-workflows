@@ -236,8 +236,8 @@ public createRelease(Map yml, Map args) {
   println """Creating release
   |---------------------------------
   ||Release    |${releaseName.center(20)}|
-  ||PreRelease |${preRelease.center(20)}|
-  ||Draft      |${draft.center(20)}|
+  ||PreRelease |${"preRelease".center(20)}|
+  ||Draft      |${"draft".center(20)}|
   """.stripMargin()
   
   concurGitHubApi.createRelease(credentials, releaseNotes, tagName, releaseName, preRelease, draft)
