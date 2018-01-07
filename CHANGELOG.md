@@ -1,5 +1,11 @@
 # Jenkins Workflows
 
+## 0.1.1
+
+### Fixed
+
+* github.createRelease: Fix issue where generated name/tag can get multiple `v`s for a prefix.
+
 ## 0.1.0
 
 ### Added

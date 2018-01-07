@@ -196,12 +196,13 @@ example:
  */
 public createRelease(Map yml, Map args) {
   String genVersion = concurGit.getVersion().split('-')[0]
+  genVersion = genVersion.startsWith('v') ? "$genVersion" : "v$genVersion"
 
   Map credentials         = args?.credentials   ?: yml.tools?.github?.credentials
   String changelogFile    = args?.changelogFile ?: yml.tools?.github?.changelog?.file      ?: 'CHANGELOG.md'
   String versionSeperator = args?.separator     ?: yml.tools?.github?.changelog?.separator ?: '##'
-  String releaseName      = args?.name          ?: "v$genVersion"
-  String tagName          = args?.tag           ?: "v$genVersion"
+  String releaseName      = args?.name          ?: genVersion
+  String tagName          = args?.tag           ?: genVersion
   String releaseNotes     = args?.notes
 
   Boolean preRelease      = args?.preRelease == null ? false : args?.preRelease
