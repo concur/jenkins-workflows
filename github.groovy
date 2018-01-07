@@ -212,7 +212,7 @@ public createRelease(Map yml, Map args) {
 
   if (!releaseNotes) {
     Map changelogReleases = concurUtil.parseChangelog(changelogFile, versionSeperator)
-    def thisRelease = changelogReleases.find { it.key.contains(releaseName) }
+    def thisRelease = changelogReleases.find { it =~ /^v?${desiredRelease.replace('v', '')}/ }
 
     assert thisRelease : "Unable to find release $releaseName in the $changelogFile and no release notes are provided to the step."
 
