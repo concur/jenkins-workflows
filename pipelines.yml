@@ -17,7 +17,7 @@ pipelines:
       binary: python3
     jenkins:
       workflows:
-        branch: master
+        branch: new-workflows
     slack:
       channel: git-notifications
   branches:
@@ -25,6 +25,9 @@ pipelines:
       steps:
         - github:
           - createRelease:
+        - slack:
+          - send:
+              message: "Version {{ short_version }} released."
     feature:
       steps:
         - python:
