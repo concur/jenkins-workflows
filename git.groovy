@@ -55,6 +55,7 @@ full_example: |
 '''
 
 concurPipeline  = new Commands()
+concurGit       = new Git()
 concurUtil      = new Util()
 
 /*
@@ -109,6 +110,11 @@ public commit(Map yml, Map args) {
   String gitCmd = "git add $pattern && git commit"
 
   if (push) {
+    def status = concurGit.runGitShellCommand('git status -s').trim().tokenize('\n')
+    if (!status) {
+      println "No working changes to commit, skipping."
+      return
+    }
     message = concurUtil.mustacheReplaceAll(message)
     author  = concurUtil.mustacheReplaceAll(author)
     email   = concurUtil.mustacheReplaceAll(email)

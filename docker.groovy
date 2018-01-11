@@ -116,8 +116,7 @@ example:
                   BuildVersion: "{{ build_version }}"
  */
 public build(Map yml, Map args) {
-  String baseVersion  = yml.general?.version?.base  ?: "0.1.0"
-  String buildVersion = concurGit.getVersion(baseVersion)
+  String buildVersion = concurGit.getVersion(yml)
 
   String dockerfile = args?.dockerfile            ?: yml.tools?.docker?.dockerfile
   String imageName  = args?.imageName             ?: yml.tools?.docker?.imageName   ?: "${env.GIT_OWNER}/${env.GIT_REPO}"
@@ -192,8 +191,7 @@ example:
                   - "{{ git_commit }}"
  */
 public push(Map yml, Map args) {
-  String baseVersion    = yml.general?.version?.base ?: "0.1.0"
-  String buildVersion   = concurGit.getVersion(baseVersion)
+  String buildVersion   = concurGit.getVersion(yml)
   String imageName      = args?.imageName      ?: yml.tools?.docker?.imageName      ?: "${env.GIT_OWNER}/${env.GIT_REPO}"
   String imageTag       = args?.imageTag       ?: yml.tools?.docker?.imageTag       ?: buildVersion
   String dockerEndpoint = args?.uri            ?: yml.tools?.docker?.uri            ?: env.DOCKER_URI
@@ -202,27 +200,27 @@ public push(Map yml, Map args) {
 
   def dockerCredentialId
 
-  assert imageName  : "No [imageName] provided in [tools.docker] or as a parameter to the docker.push step."
-  assert imageTag   : "No [imageTag] provided in [tools.docker] or as a parameter to the docker.push step."
+  assert imageName  : 'Workflows :: docker :: push :: No [imageName] provided in [tools.docker] or as a parameter to the docker.push step.'
+  assert imageTag   : 'Workflows :: docker :: push :: No [imageTag] provided in [tools.docker] or as a parameter to the docker.push step.'
 
   dockerEndpoint = concurUtil.mustacheReplaceAll(dockerEndpoint)
 
   if (credentials != null) {
     assert (credentials instanceof Map) :
-    """|Credentials are provided either in [tools.docker.credentials] or as a parameter to this step.
+    '''|Workflows :: docker :: push :: Credentials are provided either in [tools.docker.credentials] or as a parameter to this step.
        |The data provided is not a map.
        |Credentials should be defined in your pipelines.yml as:
        |----------------------------------------
        |tools:
        |  docker:
        |    credentials:
-       |      description: example docker credentials""".stripMargin().
+       |      description: example docker credentials'''.stripMargin().
     dockerCredentialId = concurPipeline.getCredentialsWithCriteria(credentials).id
   }
 
   def fullImageName = concurUtil.mustacheReplaceAll("${dockerEndpoint}/${imageName}:${imageTag}")
 
-  concurPipeline.debugPrint("Workflows :: Docker :: Push", [
+  concurPipeline.debugPrint("Workflows :: docker :: push", [
     'baseVersion'         : baseVersion,
     'imageName'           : imageName,
     'buildVersion'        : buildVersion,

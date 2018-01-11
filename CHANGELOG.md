@@ -8,6 +8,11 @@
 * Slack workflow
 * NodeJS workflow
 
+### Updates
+
+* git.commit: Checks for changes before attempting the commit, this didn't cause a failure before but is cleaner now.
+* Add more asserts to workflows.
+
 ## v0.1.1
 
 ### Fixed

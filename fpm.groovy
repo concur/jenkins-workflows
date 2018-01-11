@@ -145,7 +145,7 @@ public 'package'(Map yml, Map args) {
     fpmFlags = "${fpmFlags} ${extraArgs}"
   }
 
-  fpmFlags = concurUtil.mustacheReplaceAll(fpmFlags, ['build_version': concurGit.getVersion()])
+  fpmFlags = concurUtil.mustacheReplaceAll(fpmFlags)
 
   docker.image(buildImage).inside {
     targetTypes.each {
