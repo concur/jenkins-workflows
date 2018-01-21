@@ -145,7 +145,6 @@ public build(Map yml, Map args) {
     'dockerfile'    : dockerfile,
     'buildArgs'     : buildArgs,
     'imageName'     : imageName,
-    'baseVersion'   : baseVersion,
     'buildVersion'  : buildVersion,
     'imageTag'      : imageTag,
     'additionalArgs': additionalArgs,
@@ -221,7 +220,6 @@ public push(Map yml, Map args) {
   def fullImageName = concurUtil.mustacheReplaceAll("${dockerEndpoint}/${imageName}:${imageTag}")
 
   concurPipeline.debugPrint("Workflows :: docker :: push", [
-    'baseVersion'         : baseVersion,
     'imageName'           : imageName,
     'buildVersion'        : buildVersion,
     'imageTag'            : imageTag,
