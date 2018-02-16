@@ -65,7 +65,7 @@ full_example: |
             - push:
 '''
 
-concurPipeline  = new ConcurCommands()
+concurPipeline  = new Commands()
 concurUtil      = new Util()
 concurGit       = new Git()
 

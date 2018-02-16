@@ -9,8 +9,9 @@
 
 ### Fixes
 
-* docker.push: Fixed issue causing wrong credential to be pulled.
-* golang.getStageName: Fixed issue causing test workflow to fail due to type safety.
+* docker.push: Wrong credential was being pulled.
+* golang.getStageName: Test workflow failed due to type safety.
+* nodejs & slack: ConcurCommands class name doesn't exist.
 
 ## v0.2.0
 

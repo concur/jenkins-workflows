@@ -1,6 +1,6 @@
 import com.concur.*;
 
-concurPipeline  = new ConcurCommands()
+concurPipeline  = new Commands()
 concurUtil      = new Util()
 
 workflowDoc = '''
