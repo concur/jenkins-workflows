@@ -1,5 +1,17 @@
 # Jenkins Workflows
 
+## v0.3.0
+
+### Added
+
+* golang.lint: Lint Golang code during a pipeline execution.
+* golang.dep: Support for the official dependency manager for Golang.
+
+### Fixes
+
+* docker.push: Fixed issue causing wrong credential to be pulled.
+* golang.getStageName: Fixed issue causing test workflow to fail due to type safety.
+
 ## v0.2.0
 
 ### Added
