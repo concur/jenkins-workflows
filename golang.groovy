@@ -254,6 +254,164 @@ public godep(Map yml, Map args) {
 }
 
 /*
+description: Dep is a tool for managing Go package dependencies.
+parameters:
+  - type: String
+    name: buildImage
+    required: true
+    description: Docker image that has Godep installed.
+  - type: List
+    name: additionalArgs
+    description: Any additional arguments to Godep as a YAML style List.
+  - type: String
+    name: command
+    default: restore
+    description: Which Godep command to run.
+  - type: String
+    name: goPath
+    default: determined by SCM
+    description: The path within the container to mount the project into.
+example:
+  branches:
+    feature:
+      steps:
+        - golang:
+            # Simple
+            - dep:
+            # Advanced
+            - dep:
+                additionalArgs:
+                  - "-v"
+                  - "-update"
+ */
+public dep(Map yml, Map args) {
+  String dockerImage  = args?.buildImage      ?: yml.tools?.golang?.buildImage
+  List additionalArgs = args?.additionalArgs  ?: yml.tools?.dep?.additionalArgs
+  String command      = args?.command         ?: yml.tools?.dep?.command        ?: "ensure"
+  String goPath       = args?.goPath          ?: yml.tools?.golang?.goPath      ?: getGoPath()
+
+  assert goPath      : "Workflows :: Golang :: dep :: [goPath] is required in [tools.golang] or as a parameter to the test step."
+  assert dockerImage : "Workflows :: Golang :: dep :: [buildImage] is needed in [tools.golang] or as a parameter to the test step."
+
+  def depCommand = "dep ${command}"
+  /**
+   * Define additional args as any of the following
+   * ----------------------------------------------
+   * - golang:
+   *   - dep:
+   *       additionalArgs:
+   *         - "--force"
+   *         - "--skip-test"
+   *         - "-v"
+   */
+  if (additionalArgs) {
+    depCommand = "$depCommand ${additionalArgs.join(' ')}"
+  }
+
+  depCommand = concurUtil.mustacheReplaceAll(depCommand)
+
+  concurPipeline.debugPrint('Workflows :: golang :: dep', [
+    'dockerImage'     : dockerImage,
+    'goPath'          : goPath,
+    'command'         : command,
+    'additionalArgs'  : additionalArgs,
+    'depCommand'    : depCommand
+  ])
+
+  runCommandInDockerImage(dockerImage, goPath, {
+    concurUtil.installGoPkg('dep', 'github.com/golang/dep/cmd/dep')
+    sh "cd ${goPath} && ${depCommand}"
+  })
+}
+
+/*
+description: Build a Golang project.
+parameters:
+  - type: String
+    name: buildImage
+    description: Docker image that has the linting tool installed.
+  - type: List
+    name: additionalFlags
+    description: Any additional arguments to the linting tool as a YAML style List.
+  - type: List
+    name: enable
+    description: A list of linters to enable.
+    default: []
+  - type: String
+    name: binary
+    description: The binary you want to use for linting.
+    default: gometalinter
+  - type: String
+    name: goPath
+    description: The path within the container to mount the project into.
+    default: getGoPath()
+example:
+  branches:
+    feature:
+      steps:
+        - golang:
+            # Simple
+            - lint:
+            # Advanced
+            - lint:
+                binary: gometalinter.v1
+                enable:
+                  - vet
+                  - deadcode
+                  - goconst
+                  - errcheck
+                  - goimports
+                additionalFlags:
+                  - tests
+ */
+public lint(Map yml, Map args) {
+  String dockerImage    = args?.buildImage      ?: yml.tools?.golang?.buildImage
+  List additionalFlags  = args?.additionalFlags ?: yml.tools?.lint?.additionalFlags
+  List enable           = args?.enable          ?: yml.tools?.lint?.enable          ?: []
+  String binary         = args?.binary          ?: yml.tools?.lint?.binary          ?: 'gometalinter'
+  String installer      = args?.installer       ?: yml.tools?.lint?.installer       ?: 'github.com/alecthomas/gometalinter'
+  String goPath         = args?.goPath          ?: yml.tools?.golang?.goPath        ?: getGoPath()
+
+  String lintCommand = binary
+
+  if (enable.size() > 0) {
+    lintCommand = "$lintCommand --disable-all ${enable.collect { "--enable=$it" }.join(' ')}"
+  }
+
+  if (additionalFlags) {
+    lintCommand = "$lintCommand ${additionalFlags.collect { "--$it" }.join(' ')}"
+  }
+
+  concurPipeline.debugPrint('Workflows :: Golang :: Lint', [
+    'dockerImage'     : dockerImage,
+    'additionalFlags' : additionalFlags,
+    'enable'          : enable,
+    'binary'          : binary,
+    'installer'       : installer,
+    'goPath'          : goPath
+  ])
+
+  runCommandInDockerImage(dockerImage, goPath, {
+    concurUtil.installGoPkg(binary, installer)
+    try {
+      sh "$binary --install"
+    } catch (e) { error("Failed to install linters for $binary") }
+
+    if (additionalFlags.find { it == 'checkstyle' }) {
+      def lintResults = sh returnStdout: true, script: "cd ${goPath} && ${lintCommand}"
+      writeFile file: 'checkstyle.xml', text: lintResults
+      concurPipeline.debugPrint('Workflows :: Golang :: Lint', 'Wrote checkstyle.xml file.')
+      if (concurPipeline.getgetPluginVersion('checkstyle')) {
+        concurPipeline.debugPrint('Workflows :: Golang :: Lint', 'Checkstyle plugin installed, calling plugin.')
+        checkstyle canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', healthy: '', pattern: 'checkstyle.xml', unHealthy: ''
+      }
+    } else {
+      sh "cd ${goPath} && ${lintCommand}"
+    }
+  })
+}
+
+/*
 description: Build a Golang project.
 parameters:
   - type: String
@@ -421,7 +579,7 @@ public test(Map yml, Map args) {
   if (additionalArgs) {
     testCommand = "${testCommand} ${additionalArgs.join(' ')}"
   }
-  
+
   def shCmd = "cd ${goPath} && mkdir -p ${goPath}/${resultsPath} && ${testCommand}"
 
   shCmd = concurUtil.mustacheReplaceAll(shCmd)
@@ -463,17 +621,20 @@ private runCommandInDockerImage(String dockerImage, String goPath, Closure work)
 public getStageName(Map yml, Map args, String stepName) {
   switch(stepName) {
     case 'glide':
-      def glideCommand = args?.command ?: "install"
-      return "golang: glide: ${glideCommand}"
+      String glideCommand = args?.command ?: "install"
+      return "golang: glide: $glideCommand"
     case 'godep':
-      def godepCommand = args?.command ?: "ensure"
-      return "golang: godep: ${godepCommand}"
+      String godepCommand = args?.command ?: "ensure"
+      return "golang: godep: $godepCommand"
+    case 'lint':
+      String binary = args?.binary ?: yml.tools?.lint?.binary ?: "gometalinter"
+      return "golang: $binary"
     case 'build':
-      def os    = args?.env?.GOOS   ?: yml.tools?.golang?.env?.GOOS
-      def arch  = args?.env?.GOARCH ?: yml.tools?.golang?.env?.GOARCH
+      String os    = args?.env?.GOOS   ?: yml.tools?.golang?.env?.GOOS
+      String arch  = args?.env?.GOARCH ?: yml.tools?.golang?.env?.GOARCH
       return os ? arch ? "golang: build: $arch/$os" : "golang: build: $os" : 'golang: build'
     case 'test':
-      def testCommand = args?.additionalArgs
+      String testCommand = args?.additionalArgs.join(' ')
       return testCommand ? "golang: test: ${testCommand}" : 'golang: test'
   }
 }
