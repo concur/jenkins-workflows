@@ -1,4 +1,4 @@
-concurPipeline  = new com.concur.ConcurCommands()
+concurPipeline  = new com.concur.Commands()
 concurUtil      = new com.concur.Util()
 
 workflowDoc = '''
@@ -108,6 +108,11 @@ public getStageName(Map yml, Map args, String stepName) {
       def gradleCommand = args?.name ?: yml.tools?.gradle?.task ?: "build"
       return "gradle: task: ${gradleCommand}"
   }
+}
+
+public tests(Map yml, Map args) {
+  String workflowName = 'gradle'
+  println "Testing $workflowName"
 }
 
 return this;

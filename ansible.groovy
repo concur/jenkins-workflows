@@ -94,7 +94,6 @@ full_example: |
                 limit: production
 '''
 
-concurArtUtil   = new ArtifactoryUtil()
 concurPipeline  = new Commands()
 concurUtil      = new Util()
 concurGit       = new Git()
@@ -261,6 +260,11 @@ public getStageName(Map yml, Map args, String stepName) {
       def playbook = args?.playbook ?: yml.tools?.ansible?.playbook
       return "ansible: playbook: ${playbook}"
   }
+}
+
+public tests(Map yml, Map args) {
+  String workflowName = 'ansible'
+  println "Testing $workflowName"
 }
 
 return this;
