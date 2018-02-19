@@ -1,5 +1,21 @@
 # Jenkins Workflows
 
+## v0.4.0
+
+### Added
+
+* Start of a test framework for workflows.
+
+### Fixes
+
+* golang.lint: --checkstyle being specified would cause failures
+* golang.lint: Was not properly get values if specified under tools.golang
+
+### Changed
+
+* docker.push: Logging in changed to `echo $password | docker login $endpoint -u $user --password-stdin`
+* docker.*: Stage names changed to reflect the image name instead of dockerfile.
+
 ## v0.3.0
 
 ### Added
