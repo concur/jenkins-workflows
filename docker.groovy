@@ -241,7 +241,7 @@ public getStageName(Map yml, Map args, String stepName) {
   String imageName = args?.imageName ?: yml.tools?.docker?.imageName ?: "${env.GIT_OWNER}/${env.GIT_REPO}"
   switch(stepName) {
     case 'build':
-      return dockerfile ? "docker: build: $imageName": 'docker: build'
+      return "docker: build: $imageName"
     case 'push':
       return "docker: push: $imageName"
   }
