@@ -4,6 +4,7 @@ concurPipeline  = new Commands()
 concurUtil      = new Util()
 
 workflowDoc = '''
+title: NodeJS
 overview: Execute any NPM, Grunt or Gulp task.
 additional_resources:
   - name: NodeJS Official Site
@@ -87,7 +88,7 @@ parameters:
   - type: String
     name: npmRegistry
     description: URL to an alternate NPM registry.
-example:
+example: |
   branches:
     feature:
       steps:
@@ -143,7 +144,7 @@ parameters:
     name: command
     description: The Gulp command to run within a nodejs.gulp workflow step.
     default: install
-example:
+example: |
   branches:
     feature:
       steps:
@@ -192,7 +193,7 @@ parameters:
     name: command
     description: The Grunt command to run within a nodejs.grunt workflow step.
     default: install
-example:
+example: |
   branches:
     feature:
       steps:

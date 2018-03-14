@@ -2,7 +2,7 @@
 
 ## Overview
 
-> Includes workflows for running various language independent build tools.
+> Includes workflows for running various language independent documentation generator tools.
 
 ## Tools Section
 
@@ -30,10 +30,12 @@
 branches:
   feature:
     steps:
-    - build:
-      - mkdocs:
-      - mkdocs:
-          command: gh-deploy
+      - build:
+          # Simple
+          - mkdocs:
+          # Advanced
+          - mkdocs:
+              command: gh-deploy
 ```
 
 ## Full Example Pipeline

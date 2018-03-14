@@ -609,7 +609,7 @@
               
                 
                 
-                <h1 id="github">Github</h1>
+                <h1 id="github">GitHub</h1>
 <h2 id="overview">Overview</h2>
 <blockquote>
 <p>Steps for interacting with GitHub.</p>
@@ -732,11 +732,13 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - github:
-      - createPullRequest:
-      - createPullRequest:
-          title: Fix for issue {{ branch_name }}.
-          toBranch: develop
+      - github:
+          # Simple
+          - createPullRequest:
+          # Advanced
+          - createPullRequest:
+              toBranch: develop
+              title: Fix for issue {{ branch_name }}.
 </code></pre>
 
 <h3 id="createrelease">createRelease</h3>
@@ -801,13 +803,15 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - github:
-      - createRelease:
-      - createRelease:
-          name: 0.1.0-alpha
-          notes: '### New Features
-
-            * Pipeline execution'
+      - github:
+          # Simple
+          - createRelease:
+          # Advanced
+          - createRelease:
+              name: 0.1.0-alpha
+              notes: |
+                ### New Features
+                * Pipeline execution
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

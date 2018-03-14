@@ -883,12 +883,14 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - golang:
-      - glide:
-      - glide:
-          additionalArgs:
-          - --force
-          command: install
+      - golang:
+          # Simple
+          - glide:
+          # Advanced
+          - glide:
+              command: install
+              additionalArgs:
+                - &quot;--force&quot;
 </code></pre>
 
 <h3 id="dep">dep</h3>
@@ -940,12 +942,14 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - golang:
-      - dep:
-      - dep:
-          additionalArgs:
-          - -v
-          - -update
+      - golang:
+          # Simple
+          - dep:
+          # Advanced
+          - dep:
+              additionalArgs:
+                - &quot;-v&quot;
+                - &quot;-update&quot;
 </code></pre>
 
 <h3 id="lint">lint</h3>
@@ -998,18 +1002,20 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - golang:
-      - lint:
-      - lint:
-          additionalFlags:
-          - tests
-          binary: gometalinter.v1
-          enable:
-          - vet
-          - deadcode
-          - goconst
-          - errcheck
-          - goimports
+      - golang:
+          # Simple
+          - lint:
+          # Advanced
+          - lint:
+              binary: gometalinter.v1
+              enable:
+                - vet
+                - deadcode
+                - goconst
+                - errcheck
+                - goimports
+              additionalFlags:
+                - tests
 </code></pre>
 
 <h3 id="build">build</h3>
@@ -1074,14 +1080,16 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - golang:
-      - build:
-      - build:
-          env:
-            GOARCH: amd64
-            GOOS: linux
-          mainPath: cmd/app/main.go
-          outFile: publish/example-binary
+      - golang:
+          # Simple
+          - build:
+          # Advanced
+          - build:
+              outFile: &quot;publish/example-binary&quot;
+              mainPath: &quot;cmd/app/main.go&quot;
+              env:
+                GOOS: linux
+                GOARCH: amd64
 </code></pre>
 
 <h3 id="test">test</h3>
@@ -1154,14 +1162,16 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - golang:
-      - test:
-      - test:
-          additionalArgs:
-          - ./...
-          binary: ginkgo
-          gatherJunit: true
-          resultsPath: results
+      - golang:
+          # Simple
+          - test:
+          # Advanced
+          - test:
+              binary: ginkgo
+              additionalArgs:
+                - &quot;./...&quot;
+              gatherJunit: true
+              resultsPath: results
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

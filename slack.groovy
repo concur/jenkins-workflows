@@ -1,6 +1,7 @@
 import com.concur.*;
 
 workflowDoc = '''
+title: Slack
 overview: Send messages to a Slack channel during a job run.
 additional_resources:
   - name: Slack API
@@ -104,7 +105,7 @@ parameters:
     description: If true the entire build will fail if the Slack send is unsuccessful.
     required: false
     default: false
-example:
+example: |
   branches:
     feature:
       steps:

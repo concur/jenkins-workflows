@@ -251,6 +251,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#overview" title="Overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tools-section" title="Tools Section" class="md-nav__link">
     Tools Section
   </a>
@@ -517,6 +524,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#overview" title="Overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tools-section" title="Tools Section" class="md-nav__link">
     Tools Section
   </a>
@@ -596,6 +610,10 @@
                 
                 
                 <h1 id="docker">Docker</h1>
+<h2 id="overview">Overview</h2>
+<blockquote>
+<p>Build, tag and push Docker images to any registry.</p>
+</blockquote>
 <h2 id="tools-section">Tools Section</h2>
 <table>
 <thead>
@@ -730,14 +748,16 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - docker:
-      - build:
-      - build:
-          buildArgs:
-            BuildDate: '{{ timestamp }}'
-            BuildVersion: '{{ build_version }}'
-            CommitSha: '{{ git_commit }}'
-          dockerfile: production.dockerfile
+      - docker:
+          # Simple
+          - build:
+          # Advanced
+          - build:
+              dockerfile: production.dockerfile
+              buildArgs:
+                CommitSha: &quot;{{ git_commit }}&quot;
+                BuildDate: &quot;{{ timestamp }}&quot;
+                BuildVersion: &quot;{{ build_version }}&quot;
 </code></pre>
 
 <h3 id="push">push</h3>
@@ -790,13 +810,15 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - docker:
-      - push:
-      - push:
-          additionalTags:
-          - '{{ git_commit }}'
-          credentials:
-            description: example docker creds.
+      - docker:
+          # Simple
+          - push:
+          # Advanced
+          - push:
+              credentials:
+                description: example docker creds.
+              additionalTags:
+                - &quot;{{ git_commit }}&quot;
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

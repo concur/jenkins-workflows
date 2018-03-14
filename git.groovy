@@ -1,6 +1,7 @@
 import com.concur.*;
 
 workflowDoc = '''
+title: Git
 overview: "Various git functions for use within your pipeline. __NOTE__: You are fully responsible for usage of this workflow, there is potential to cause bad commits."
 additional_resources:
   - name: Official documentation on commits
@@ -84,7 +85,7 @@ parameters:
   - type: Map
     name: credentials
     description: Credentials to use when pushing to git origin.
-example:
+example: |
   branches:
     feature:
       steps:

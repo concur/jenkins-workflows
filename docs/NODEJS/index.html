@@ -637,7 +637,7 @@
               
                 
                 
-                <h1 id="nodejs">Nodejs</h1>
+                <h1 id="nodejs">NodeJS</h1>
 <h2 id="overview">Overview</h2>
 <blockquote>
 <p>Execute any NPM, Grunt or Gulp task.</p>
@@ -757,10 +757,12 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - nodejs:
-      - node:
-      - node:
-          command: compile
+      - nodejs:
+          # Simple
+          - node:
+          # Advanced
+          - node:
+              command: compile
 </code></pre>
 
 <h3 id="gulp">gulp</h3>
@@ -801,10 +803,12 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - nodejs:
-      - gulp:
-      - gulp:
-          name: compileScss
+      - nodejs:
+          # Simple
+          - gulp:
+          # Advanced
+          - gulp:
+              name: compileScss
 </code></pre>
 
 <h3 id="grunt">grunt</h3>
@@ -845,10 +849,12 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - nodejs:
-      - grunt:
-      - grunt:
-          name: webpack
+      - nodejs:
+          # Simple
+          - grunt:
+          # Advanced
+          - grunt:
+              name: webpack
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

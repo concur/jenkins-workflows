@@ -1,6 +1,7 @@
 import com.concur.*;
 
 workflowDoc = '''
+title: Ansible
 overview: Execute Ansible playbooks within a pipeline.
 additional_resources:
   - name: Ansible
@@ -156,7 +157,7 @@ parameters:
     name: verbosity
     required: false
     description: Levels of verbose output to have. Example setting this to 2 would be the equivalent of -vv.
-example:
+example: |
   branches:
     feature:
       steps:

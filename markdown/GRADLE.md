@@ -32,11 +32,13 @@
 branches:
   feature:
     steps:
-    - gradle:
-      - task:
-      - task:
-          binary: gradle
-          name: compile
+      - gradle:
+          # Simple
+          - task:
+          # Advanced
+          - task:
+              binary: gradle
+              name: compile
 ```
 
 ## Full Example Pipeline

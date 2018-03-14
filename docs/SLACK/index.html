@@ -720,10 +720,12 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - slack:
-      - send:
-      - send:
-          message: 'Test message during job #&lt;{{ build_url }}|{{ build_number }}}&gt;.'
+      - slack:
+          # Simple
+          - send:
+          # Advanced
+          - send:
+              message: &quot;Test message during job #&lt;{{ build_url }}|{{ build_number }}}&gt;.&quot;
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

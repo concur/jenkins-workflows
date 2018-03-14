@@ -1,6 +1,8 @@
 import org.codehaus.groovy.runtime.GStringImpl;
 
 workflowDoc = '''
+title: Docker
+overview: Build, tag and push Docker images to any registry.
 additional_resources:
   - name: Promotion - Artifactory
     url: https://wiki.concur.com/confluence/display/DA/Promotion+-+Artifactory
@@ -100,7 +102,7 @@ parameters:
   - type: Map
     name: buildArgs
     description: A map of arguments to pass to docker build command, equivalent to `--build-arg <key>=<value>`.
-example:
+example: |
   branches:
     feature:
       steps:
@@ -175,7 +177,7 @@ parameters:
   - name: credentials
     type: Map
     description: A map of criteria to use to search for your credential.
-example:
+example: |
   branches:
     feature:
       steps:

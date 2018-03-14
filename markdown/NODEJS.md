@@ -1,4 +1,4 @@
-# Nodejs
+# NodeJS
 
 ## Overview
 
@@ -36,10 +36,12 @@
 branches:
   feature:
     steps:
-    - nodejs:
-      - node:
-      - node:
-          command: compile
+      - nodejs:
+          # Simple
+          - node:
+          # Advanced
+          - node:
+              command: compile
 ```
 
 ### gulp
@@ -58,10 +60,12 @@ branches:
 branches:
   feature:
     steps:
-    - nodejs:
-      - gulp:
-      - gulp:
-          name: compileScss
+      - nodejs:
+          # Simple
+          - gulp:
+          # Advanced
+          - gulp:
+              name: compileScss
 ```
 
 ### grunt
@@ -80,10 +84,12 @@ branches:
 branches:
   feature:
     steps:
-    - nodejs:
-      - grunt:
-      - grunt:
-          name: webpack
+      - nodejs:
+          # Simple
+          - grunt:
+          # Advanced
+          - grunt:
+              name: webpack
 ```
 
 ## Full Example Pipeline

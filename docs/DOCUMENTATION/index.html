@@ -584,7 +584,7 @@
                 <h1 id="documentation">Documentation</h1>
 <h2 id="overview">Overview</h2>
 <blockquote>
-<p>Includes workflows for running various language independent build tools.</p>
+<p>Includes workflows for running various language independent documentation generator tools.</p>
 </blockquote>
 <h2 id="tools-section">Tools Section</h2>
 <table>
@@ -660,10 +660,12 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - build:
-      - mkdocs:
-      - mkdocs:
-          command: gh-deploy
+      - build:
+          # Simple
+          - mkdocs:
+          # Advanced
+          - mkdocs:
+              command: gh-deploy
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

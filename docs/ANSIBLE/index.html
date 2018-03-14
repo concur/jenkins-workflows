@@ -804,13 +804,15 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - ansible:
-      - playbook:
-      - playbook:
-          extraVars:
-            DOCKER_IMAGE: '{{ DOCKER_IMAGE_TAG }}'
-          limit: qa
-          playbook: scripts/ansible/example-playbook.yml
+      - ansible:
+          # Simple
+          - playbook:
+          # Advanced
+          - playbook:
+              playbook: scripts/ansible/example-playbook.yml
+              extraVars:
+                DOCKER_IMAGE: &quot;{{ DOCKER_IMAGE_TAG }}&quot;
+              limit: qa
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

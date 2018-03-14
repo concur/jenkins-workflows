@@ -748,11 +748,13 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - email:
-      - send: Example email from {{ build_url }}
-      - send:
-          body: Example email from {{ build_url }}
-          to: user@example.com
+      - email:
+          # Simple
+          - send: &quot;Example email from {{ build_url }}&quot;
+          # Advanced
+          - send:
+              to: user@example.com
+              body: &quot;Example email from {{ build_url }}&quot;
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

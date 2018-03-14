@@ -692,11 +692,13 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - python:
-      - script:
-      - script:
-          binary: python3
-          script: scripts/update_docs.py
+      - python:
+          # Simple
+          - script:
+          # Advanced
+          - script:
+              binary: python3
+              script: scripts/update_docs.py
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

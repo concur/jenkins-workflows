@@ -36,9 +36,11 @@
 branches:
   feature:
     steps:
-    - git:
-      - commit: Example email from {{ build_url }}
-      - commit:
+      - git:
+          # Simple
+          - commit: "Example email from {{ build_url }}"
+          # Advanced
+          - commit:
 ```
 
 ## Full Example Pipeline

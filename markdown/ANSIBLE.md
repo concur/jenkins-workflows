@@ -50,13 +50,15 @@
 branches:
   feature:
     steps:
-    - ansible:
-      - playbook:
-      - playbook:
-          extraVars:
-            DOCKER_IMAGE: '{{ DOCKER_IMAGE_TAG }}'
-          limit: qa
-          playbook: scripts/ansible/example-playbook.yml
+      - ansible:
+          # Simple
+          - playbook:
+          # Advanced
+          - playbook:
+              playbook: scripts/ansible/example-playbook.yml
+              extraVars:
+                DOCKER_IMAGE: "{{ DOCKER_IMAGE_TAG }}"
+              limit: qa
 ```
 
 ## Full Example Pipeline

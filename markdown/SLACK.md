@@ -38,10 +38,12 @@
 branches:
   feature:
     steps:
-    - slack:
-      - send:
-      - send:
-          message: 'Test message during job #<{{ build_url }}|{{ build_number }}}>.'
+      - slack:
+          # Simple
+          - send:
+          # Advanced
+          - send:
+              message: "Test message during job #<{{ build_url }}|{{ build_number }}}>."
 ```
 
 ## Full Example Pipeline

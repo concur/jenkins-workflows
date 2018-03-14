@@ -581,7 +581,7 @@
               
                 
                 
-                <h1 id="fpm">Fpm</h1>
+                <h1 id="fpm">FPM</h1>
 <h2 id="overview">Overview</h2>
 <blockquote>
 <p>Use the FPM tool to create packages for various systems.</p>
@@ -734,13 +734,15 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - ansible:
-      - playbook:
-      - playbook:
-          extraVars:
-            DOCKER_IMAGE: '{{ DOCKER_IMAGE_TAG }}'
-          limit: qa
-          playbook: scripts/ansible/example-playbook.yml
+      - ansible:
+          # Simple
+          - playbook:
+          # Advanced
+          - playbook:
+              playbook: scripts/ansible/example-playbook.yml
+              extraVars:
+                DOCKER_IMAGE: &quot;{{ DOCKER_IMAGE_TAG }}&quot;
+              limit: qa
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

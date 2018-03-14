@@ -1,5 +1,9 @@
 # Docker
 
+## Overview
+
+> Build, tag and push Docker images to any registry.
+
 ## Tools Section
 
 | Name           | Type   | Default                                     | Section   | Description                                                                                                |
@@ -35,14 +39,16 @@
 branches:
   feature:
     steps:
-    - docker:
-      - build:
-      - build:
-          buildArgs:
-            BuildDate: '{{ timestamp }}'
-            BuildVersion: '{{ build_version }}'
-            CommitSha: '{{ git_commit }}'
-          dockerfile: production.dockerfile
+      - docker:
+          # Simple
+          - build:
+          # Advanced
+          - build:
+              dockerfile: production.dockerfile
+              buildArgs:
+                CommitSha: "{{ git_commit }}"
+                BuildDate: "{{ timestamp }}"
+                BuildVersion: "{{ build_version }}"
 ```
 
 ### push
@@ -63,13 +69,15 @@ branches:
 branches:
   feature:
     steps:
-    - docker:
-      - push:
-      - push:
-          additionalTags:
-          - '{{ git_commit }}'
-          credentials:
-            description: example docker creds.
+      - docker:
+          # Simple
+          - push:
+          # Advanced
+          - push:
+              credentials:
+                description: example docker creds.
+              additionalTags:
+                - "{{ git_commit }}"
 ```
 
 ## Full Example Pipeline

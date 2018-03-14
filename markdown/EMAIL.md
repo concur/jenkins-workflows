@@ -42,11 +42,13 @@
 branches:
   feature:
     steps:
-    - email:
-      - send: Example email from {{ build_url }}
-      - send:
-          body: Example email from {{ build_url }}
-          to: user@example.com
+      - email:
+          # Simple
+          - send: "Example email from {{ build_url }}"
+          # Advanced
+          - send:
+              to: user@example.com
+              body: "Example email from {{ build_url }}"
 ```
 
 ## Full Example Pipeline

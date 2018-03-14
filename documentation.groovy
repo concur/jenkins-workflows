@@ -2,7 +2,8 @@
 import com.concur.*;
 
 workflowDoc = '''
-overview: Includes workflows for running various language independent build tools.
+title: Documentation
+overview: Includes workflows for running various language independent documentation generator tools.
 additional_resources:
   - name: Mkdocs
     url: http://www.mkdocs.org
@@ -50,7 +51,7 @@ parameters:
   - type: List
     name: extraArgs
     description: A list of extra arguments to append to the command.
-example:
+example: |
   branches:
     feature:
       steps:

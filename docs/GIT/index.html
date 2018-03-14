@@ -699,9 +699,11 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - git:
-      - commit: Example email from {{ build_url }}
-      - commit:
+      - git:
+          # Simple
+          - commit: &quot;Example email from {{ build_url }}&quot;
+          # Advanced
+          - commit:
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

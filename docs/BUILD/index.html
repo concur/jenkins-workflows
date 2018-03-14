@@ -660,10 +660,12 @@
 <pre><code class="yaml">branches:
   feature:
     steps:
-    - build:
-      - mage:
-      - mage:
-          target: Install
+      - build:
+          # Simple
+          - mage:
+          # Advanced
+          - mage:
+              target: Install
 </code></pre>
 
 <h2 id="full-example-pipeline">Full Example Pipeline</h2>

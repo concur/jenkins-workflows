@@ -1,6 +1,7 @@
 import com.concur.*;
 
 workflowDoc = '''
+title: Python
 overview: Run Python scripts.
 additional_resources:
   - name: Docker images
@@ -72,7 +73,7 @@ parameters:
     name: arguments
     description: List of arguments to the script, should include any flags if needed.
     required: false
-example:
+example: |
   branches:
     feature:
       steps:

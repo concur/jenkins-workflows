@@ -1,6 +1,7 @@
 import com.concur.*;
 
 workflowDoc = '''
+title: Rust
 overview: Steps for building and testing with Golang.
 additional_resources:
   - name: Rust
@@ -57,7 +58,7 @@ parameters:
     name: command
     description: Which cargo command to execute.
     default: build
-example:
+example: |
   branches:
     feature:
       steps:

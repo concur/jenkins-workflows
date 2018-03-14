@@ -34,11 +34,13 @@
 branches:
   feature:
     steps:
-    - python:
-      - script:
-      - script:
-          binary: python3
-          script: scripts/update_docs.py
+      - python:
+          # Simple
+          - script:
+          # Advanced
+          - script:
+              binary: python3
+              script: scripts/update_docs.py
 ```
 
 ## Full Example Pipeline

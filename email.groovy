@@ -1,6 +1,7 @@
 import com.concur.*;
 
 workflowDoc = '''
+title: Email
 overview: Send an email within your pipeline.
 additional_resources:
   - name: Mail plugin site
@@ -102,7 +103,7 @@ parameters:
   - type: String
     name: replyTo
     description: Reply-To email address.
-example:
+example: |
   branches:
     feature:
       steps:

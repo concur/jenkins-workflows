@@ -30,10 +30,12 @@
 branches:
   feature:
     steps:
-    - build:
-      - mage:
-      - mage:
-          target: Install
+      - build:
+          # Simple
+          - mage:
+          # Advanced
+          - mage:
+              target: Install
 ```
 
 ## Full Example Pipeline
