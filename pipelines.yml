@@ -46,6 +46,7 @@ pipelines:
       steps:
         - github:
           - createRelease:
+              changelogFile: markdown/CHANGELOG.md
         - slack:
           - send:
               message: "Version {{ short_version }} released."
